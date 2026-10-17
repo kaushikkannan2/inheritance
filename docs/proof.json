@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-17T21:18:34",
+  "at": "2026-10-17T21:50:39",
   "incremental": {
     "prs": [
       {
@@ -190,7 +190,7 @@
     "need_climb": 28108,
     "need_climb_pct": 89.4,
     "via_child_of": 1829,
-    "seconds": 76.9
+    "seconds": 76.4
   },
   "ablation": {
     "baseline": {
@@ -725,20 +725,24 @@
           "lavalamp",
           "liggitt"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
       "keps": {
         "grounded": [
           "4020"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
       "paths": {
         "grounded": [
           "pkg/registry"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
+      "recalled": 0,
       "score": "5/5",
       "all_grounded": true
     },
@@ -747,22 +751,26 @@
         "grounded": [
           "lavalamp"
         ],
+        "from_graph_memory": [],
         "not_from_graph": [
           "bgrant0607"
         ]
       },
       "keps": {
         "grounded": [],
+        "from_graph_memory": [],
         "not_from_graph": [
           "9999"
         ]
       },
       "paths": {
         "grounded": [],
+        "from_graph_memory": [],
         "not_from_graph": [
           "pkg/scheduler"
         ]
       },
+      "recalled": 0,
       "score": "1/4",
       "all_grounded": false
     },
@@ -780,7 +788,7 @@
         "traversal": 1
       },
       "rows": 48,
-      "ms": 12.8
+      "ms": 12.6
     },
     {
       "tool": "departure_impact",
@@ -793,7 +801,7 @@
         "traversal": 2
       },
       "rows": 406,
-      "ms": 45.7
+      "ms": 50.7
     },
     {
       "tool": "departure_impact",
@@ -810,7 +818,7 @@
         "traversal": 2
       },
       "rows": 748,
-      "ms": 65.2
+      "ms": 69.4
     },
     {
       "tool": "heirs",
@@ -822,7 +830,7 @@
         "match": 17
       },
       "rows": 56,
-      "ms": 47.5
+      "ms": 49.9
     },
     {
       "tool": "why",
@@ -835,7 +843,7 @@
         "match": 8
       },
       "rows": 16,
-      "ms": 21.4
+      "ms": 25.0
     },
     {
       "tool": "single_points_of_failure",
@@ -846,7 +854,7 @@
         "match": 1
       },
       "rows": 16,
-      "ms": 9.5
+      "ms": 10.3
     },
     {
       "tool": "orphaned_knowledge",
@@ -869,7 +877,7 @@
         "traversal": 586
       },
       "rows": 9494,
-      "ms": 1580.5
+      "ms": 1555.6
     },
     {
       "tool": "keystone_people",
@@ -880,7 +888,7 @@
         "algorithm": 1
       },
       "rows": 10,
-      "ms": 399.7
+      "ms": 486.2
     }
   ]
 }

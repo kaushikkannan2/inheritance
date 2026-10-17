@@ -108,12 +108,12 @@ drafted, who a question went to, and what has changed since.
 | **Correctness**: for every file in kubernetes/kubernetes, the graph's "who approves this?" matches an independent walk over the raw OWNERS files | **31,441 of 31,441 files (100%)** |
 | **Depth**: how far each answer lives from its file | 89% of files are governed by an OWNERS file in a folder above them, up to 10 levels up. For 1,829 files the nearest OWNERS file names no approvers, so the answer only exists by walking `CHILD_OF` edges |
 | **Ablation**: delete one relationship type on a copy of the graph, then re-ask the 10 headline questions | every relationship type changes at least one answer (table below) |
-| **Grounding**: every person, KEP and folder that an answer names must have been returned by FalkorDB in that session | an invented answer is flagged: `bgrant0607`, `KEP-9999`, `pkg/scheduler` |
+| **Grounding**: every person, KEP and folder that an answer names must have been returned by FalkorDB, either in that session or in the graph-memory brief read at session start | an invented answer is flagged: `bgrant0607`, `KEP-9999`, `pkg/scheduler`. Real agent runs scored 27/27, 30/30 and 15/16 (the 16th was a fact recalled from an earlier session, now counted as "from graph memory") |
 | **Receipts**: what FalkorDB does per tool | most tools take 2 to 17 queries and 10 to 85 ms; the algorithms take 0.5 to 1.7 s |
 
 | Relationship removed | Answers that change |
 |---|---|
-| `CHILD_OF` (folder tree) | who approves core API validation, if thockin left, single points of failure, shadow teams |
+| `CHILD_OF` (folder tree) | who approves core API validation, if thockin left, single points of failure (and, in some runs, shadow teams: label propagation can settle differently) |
 | `APPROVES` | who approves kubelet code, who approves core API validation, if thockin left, single points of failure |
 | `EMERITUS_OF` | what lavalamp left |
 | `WORKED_WITH` | lavalamp's heirs, shadow teams, keystones |
