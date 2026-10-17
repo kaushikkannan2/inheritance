@@ -47,7 +47,8 @@ def parse_owners(root=f"{RAW}/k8s"):
         return [o for o in out if o]
 
     dirs = {}
-    for p in glob.glob(f"{root}/**/OWNERS", recursive=True):
+    files = [os.path.join(d, "OWNERS") for d, sub, fs in os.walk(root) if "OWNERS" in fs and ".git" not in d.split(os.sep)]
+    for p in files:  # os.walk, not glob: glob skips hidden folders such as .github
         try:
             d = yaml.safe_load(open(p)) or {}
         except yaml.YAMLError:

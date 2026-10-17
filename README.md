@@ -36,17 +36,56 @@ self-joins and offline batch jobs.
 
 | | |
 |---|---|
-| People in the records | 852: 260 active, 140 emeritus, 452 seen only on design docs |
-| Code areas with their own OWNERS file | 585, of which 116 list a former approver |
+| People in the records | 853: 264 active, 137 emeritus, 452 seen only on design docs |
+| Code areas with their own OWNERS file | 586, of which 149 list a former approver |
 | **A real departure:** `lavalamp` | Emeritus on 31 code areas and 39 design decisions. Nothing went dark: `deads2k`, `liggitt` and `sttts` already approve 22, 20 and 18 of those areas. This is what a good inheritance looks like. |
 | **What if `thockin` left today?** | 137 code areas: 1 with no local approver left, 9 down to a single approver. 12 of 107 design decisions would have nobody active left who wrote or approved them (for example IPVS load balancing and SCTP support). |
 | **…together with `liggitt` and `deads2k`?** | 239 areas, 35 down to one approver, 28 decisions with nobody left, 3 leadership seats (Network, Auth, API Machinery). |
 | Single points of failure | 45 areas whose OWNERS file has exactly one active approver |
-| Orphaned decisions | 5 of 298 implemented design decisions have no author or approver still active |
-| Shadow teams | Label propagation finds groups that cut across official teams: one 47-person group centred on Node spans 8 official teams |
+| Orphaned decisions | 4 of 298 implemented design decisions have no author or approver still active |
+| Shadow teams | Label propagation finds groups that cut across official teams: one 48-person group centred on Node spans 8 official teams |
 | Keystones (betweenness) | `deads2k`, `liggitt`, `thockin`, `sttts`, `dims` |
 
 "Active" means currently listed as an approver, reviewer or team lead.
+
+## Proving the graph does the work
+
+`python scripts/prove_graph.py` runs these checks without an LLM and writes `docs/proof.json`.
+
+| Check | Result |
+|---|---|
+| **Integrity**: every node and edge type is loaded, and there is one `Dir` node per OWNERS file on disk | 586 = 586 |
+| **Correctness**: for every file in kubernetes/kubernetes, the graph's "who approves this?" matches an independent walk over the raw OWNERS files | **31,441 of 31,441 files (100%)** |
+| **Depth**: how far the answer lives from the file | 89% of files are governed by an OWNERS file in a folder above them; climbs go up to 10 levels; 1,829 files sit under an OWNERS file with no approvers, so their answer only exists by walking `CHILD_OF` edges |
+| **Ablation**: delete one relationship type (on a copy of the graph), re-ask the 10 headline questions | every relationship type changes at least one answer; see below |
+| **Grounding**: every person, KEP and folder an answer names must have been returned by FalkorDB in that session | an invented answer is flagged (`bgrant0607`, `KEP-9999`, `pkg/scheduler`) |
+| **Receipts**: what FalkorDB does per tool | 2 to 17 queries and 10 to 65 ms for most tools; the algorithms take 0.4 to 1.7 s |
+
+Ablation, with each relationship type removed:
+
+| Removed | Answers that change |
+|---|---|
+| `CHILD_OF` (folder tree) | who approves core API validation, if thockin left, single points of failure, shadow teams |
+| `APPROVES` | who approves kubelet code, who approves core API validation, if thockin left, single points of failure |
+| `EMERITUS_OF` | what lavalamp left |
+| `WORKED_WITH` | lavalamp's heirs, shadow teams, keystones |
+| `AUTHORED` / `APPROVED` | what lavalamp left, if thockin left, who can explain sidecars, orphaned decisions |
+| `LEADS` | if thockin left (leadership seats) |
+| `OWNS` | shadow teams (official team membership) |
+
+Every agent answer ends with a **graph receipt**, which is also saved to `out/receipts/`:
+
+```
+── graph receipt ─────────────────────────────────────────────
+4 tool calls · 29 Cypher queries · 206 rows · 109 ms in FalkorDB
+   29 match
+grounding: N/N names in the answer came back from FalkorDB this session ✓
+   ⚠ (any person, KEP or folder that did not come from the graph is listed here)
+──────────────────────────────────────────────────────────────
+```
+
+As a control, `python -m inheritance.agent --no-graph "..."` sends the same question to the same
+model with no tools. Its receipt shows which of the names in that answer the graph never returned.
 
 ## Responsible use
 
@@ -183,6 +222,7 @@ pip install -r requirements.txt
 ./scripts/fetch_data.sh                    # ~110 MB sparse clones, pinned commits, ~30 s
 python -m inheritance.load --reset         # builds the graph, ~5 s
 ./scripts/demo.sh                          # replays every demo beat without an LLM
+python scripts/prove_graph.py              # the checks above, ~80 s
 ```
 
 Ask the agent (needs an Anthropic API key):
@@ -192,6 +232,7 @@ export ANTHROPIC_API_KEY=...               # user-level keys (sk-ant-usr-...) al
 export ANTHROPIC_WORKSPACE_ID=wrkspc_...
 python -m inheritance.agent                # interactive
 python -m inheritance.agent "If thockin left tomorrow, what would go dark and who should we start pairing with?"
+python -m inheritance.agent --no-graph "If thockin left tomorrow, what would go dark?"   # control: no graph
 ```
 
 Or call the tools directly: `python -m inheritance.cli --help`.

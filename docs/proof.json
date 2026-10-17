@@ -1,0 +1,737 @@
+{
+  "at": "2026-10-17T18:41:26",
+  "integrity": {
+    "nodes": {
+      "Person": 853,
+      "Dir": 586,
+      "Subproject": 241,
+      "KEP": 679,
+      "Team": 37
+    },
+    "edges": {
+      "EMERITUS_OF": 318,
+      "PART_OF": 241,
+      "REPLACES": 8,
+      "INVOLVES": 469,
+      "LED": 124,
+      "REVIEWED": 1964,
+      "REVIEWS": 3104,
+      "OWNED_BY": 683,
+      "APPROVED": 1305,
+      "APPROVES": 2619,
+      "LEADS": 174,
+      "AUTHORED": 1148,
+      "OWNS": 150,
+      "WORKED_WITH": 11613,
+      "CHILD_OF": 585
+    },
+    "owners_files_on_disk": 586
+  },
+  "correctness": {
+    "files": 31441,
+    "folders": 5110,
+    "agree": 31441,
+    "agree_pct": 100.0,
+    "differ": [],
+    "hops": {
+      "0": 3333,
+      "1": 4036,
+      "2": 8328,
+      "3": 3021,
+      "4": 4652,
+      "5": 6825,
+      "6": 783,
+      "7": 301,
+      "8": 142,
+      "9": 15,
+      "10": 5
+    },
+    "need_climb": 28108,
+    "need_climb_pct": 89.4,
+    "via_child_of": 1829,
+    "seconds": 49.5
+  },
+  "ablation": {
+    "baseline": {
+      "who approves kubelet code": [
+        "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+        9
+      ],
+      "who approves core API validation": [
+        "kubernetes/kubernetes/pkg/apis/OWNERS",
+        6
+      ],
+      "what lavalamp left": [
+        31,
+        39
+      ],
+      "lavalamp's heirs": [
+        "deads2k",
+        "liggitt",
+        "sttts"
+      ],
+      "if thockin left": [
+        137,
+        1,
+        9,
+        12,
+        [
+          "Network"
+        ],
+        [
+          "kubernetes/kubernetes/pkg/proxy/OWNERS"
+        ]
+      ],
+      "who can explain sidecars": [
+        "matthyx",
+        "mrunalp",
+        "sergeykanzhelev",
+        "thockin"
+      ],
+      "single points of failure": [
+        45,
+        8
+      ],
+      "orphaned decisions": 4,
+      "shadow teams": [
+        10,
+        48
+      ],
+      "keystones": [
+        "deads2k",
+        "liggitt",
+        "thockin"
+      ]
+    },
+    "without": {
+      "CHILD_OF": {
+        "changed": [
+          "who approves core API validation",
+          "if thockin left",
+          "single points of failure",
+          "shadow teams"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            null,
+            0
+          ],
+          "what lavalamp left": [
+            31,
+            39
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            12,
+            [
+              "Network"
+            ],
+            [
+              null
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            0
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            10,
+            44
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "APPROVES": {
+        "changed": [
+          "who approves kubelet code",
+          "who approves core API validation",
+          "if thockin left",
+          "single points of failure"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            null,
+            0
+          ],
+          "who approves core API validation": [
+            null,
+            0
+          ],
+          "what lavalamp left": [
+            31,
+            39
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            0,
+            0,
+            0,
+            12,
+            [
+              "Network"
+            ],
+            []
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            0,
+            null
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            10,
+            48
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "EMERITUS_OF": {
+        "changed": [
+          "what lavalamp left"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            0,
+            39
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            12,
+            [
+              "Network"
+            ],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            10,
+            48
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "WORKED_WITH": {
+        "changed": [
+          "lavalamp's heirs",
+          "shadow teams",
+          "keystones"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            31,
+            39
+          ],
+          "lavalamp's heirs": [],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            12,
+            [
+              "Network"
+            ],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            0,
+            null
+          ],
+          "keystones": [
+            "zylxjtu",
+            "zshihang",
+            "zmerlynn"
+          ]
+        }
+      },
+      "AUTHORED": {
+        "changed": [
+          "what lavalamp left",
+          "if thockin left",
+          "who can explain sidecars",
+          "orphaned decisions"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            31,
+            37
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            42,
+            [
+              "Network"
+            ],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "mrunalp",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 16,
+          "shadow teams": [
+            10,
+            48
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "APPROVED": {
+        "changed": [
+          "what lavalamp left",
+          "if thockin left",
+          "who can explain sidecars",
+          "orphaned decisions"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            31,
+            2
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            4,
+            [
+              "Network"
+            ],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "sergeykanzhelev"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 83,
+          "shadow teams": [
+            10,
+            48
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "LEADS": {
+        "changed": [
+          "if thockin left"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            31,
+            39
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            12,
+            [],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            10,
+            48
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      },
+      "OWNS": {
+        "changed": [
+          "shadow teams"
+        ],
+        "answers": {
+          "who approves kubelet code": [
+            "kubernetes/kubernetes/pkg/kubelet/OWNERS",
+            9
+          ],
+          "who approves core API validation": [
+            "kubernetes/kubernetes/pkg/apis/OWNERS",
+            6
+          ],
+          "what lavalamp left": [
+            31,
+            39
+          ],
+          "lavalamp's heirs": [
+            "deads2k",
+            "liggitt",
+            "sttts"
+          ],
+          "if thockin left": [
+            137,
+            1,
+            9,
+            12,
+            [
+              "Network"
+            ],
+            [
+              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+            ]
+          ],
+          "who can explain sidecars": [
+            "matthyx",
+            "mrunalp",
+            "sergeykanzhelev",
+            "thockin"
+          ],
+          "single points of failure": [
+            45,
+            8
+          ],
+          "orphaned decisions": 4,
+          "shadow teams": [
+            10,
+            null
+          ],
+          "keystones": [
+            "deads2k",
+            "liggitt",
+            "thockin"
+          ]
+        }
+      }
+    },
+    "questions": [
+      "who approves kubelet code",
+      "who approves core API validation",
+      "what lavalamp left",
+      "lavalamp's heirs",
+      "if thockin left",
+      "who can explain sidecars",
+      "single points of failure",
+      "orphaned decisions",
+      "shadow teams",
+      "keystones"
+    ]
+  },
+  "grounding": {
+    "fixture_true": {
+      "people": {
+        "grounded": [
+          "deads2k",
+          "lavalamp",
+          "liggitt"
+        ],
+        "not_from_graph": []
+      },
+      "keps": {
+        "grounded": [
+          "4020"
+        ],
+        "not_from_graph": []
+      },
+      "paths": {
+        "grounded": [
+          "pkg/registry"
+        ],
+        "not_from_graph": []
+      },
+      "score": "5/5",
+      "all_grounded": true
+    },
+    "fixture_false": {
+      "people": {
+        "grounded": [
+          "lavalamp"
+        ],
+        "not_from_graph": [
+          "bgrant0607"
+        ]
+      },
+      "keps": {
+        "grounded": [],
+        "not_from_graph": [
+          "9999"
+        ]
+      },
+      "paths": {
+        "grounded": [],
+        "not_from_graph": [
+          "pkg/scheduler"
+        ]
+      },
+      "score": "1/4",
+      "all_grounded": false
+    },
+    "agent_runs": []
+  },
+  "receipts": [
+    {
+      "tool": "who_approves",
+      "args": {
+        "path": "pkg/kubelet/kuberuntime/kuberuntime_container.go"
+      },
+      "queries": 3,
+      "by_kind": {
+        "match": 2,
+        "traversal": 1
+      },
+      "rows": 46,
+      "ms": 9.1
+    },
+    {
+      "tool": "departure_impact",
+      "args": {
+        "handle": "thockin"
+      },
+      "queries": 7,
+      "by_kind": {
+        "match": 6,
+        "traversal": 1
+      },
+      "rows": 395,
+      "ms": 38.9
+    },
+    {
+      "tool": "departure_impact",
+      "args": {
+        "handle": "thockin",
+        "also_leaving": [
+          "liggitt",
+          "deads2k"
+        ]
+      },
+      "queries": 9,
+      "by_kind": {
+        "match": 8,
+        "traversal": 1
+      },
+      "rows": 737,
+      "ms": 65.3
+    },
+    {
+      "tool": "heirs",
+      "args": {
+        "handle": "lavalamp"
+      },
+      "queries": 17,
+      "by_kind": {
+        "match": 17
+      },
+      "rows": 56,
+      "ms": 57.3
+    },
+    {
+      "tool": "why",
+      "args": {
+        "topic": "sidecar containers"
+      },
+      "queries": 7,
+      "by_kind": {
+        "fulltext": 1,
+        "match": 6
+      },
+      "rows": 14,
+      "ms": 21.7
+    },
+    {
+      "tool": "single_points_of_failure",
+      "args": {},
+      "queries": 2,
+      "by_kind": {
+        "traversal": 1,
+        "match": 1
+      },
+      "rows": 16,
+      "ms": 15.2
+    },
+    {
+      "tool": "orphaned_knowledge",
+      "args": {},
+      "queries": 3,
+      "by_kind": {
+        "match": 3
+      },
+      "rows": 6,
+      "ms": 17.9
+    },
+    {
+      "tool": "shadow_teams",
+      "args": {},
+      "queries": 593,
+      "by_kind": {
+        "write": 3,
+        "algorithm": 1,
+        "match": 3,
+        "traversal": 586
+      },
+      "rows": 9498,
+      "ms": 1735.2
+    },
+    {
+      "tool": "keystone_people",
+      "args": {},
+      "queries": 4,
+      "by_kind": {
+        "write": 3,
+        "algorithm": 1
+      },
+      "rows": 10,
+      "ms": 350.5
+    }
+  ]
+}

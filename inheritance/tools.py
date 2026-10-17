@@ -3,6 +3,7 @@
 Every answer carries provenance (the OWNERS file or KEP it came from). The brain answers
 FROM people's public record, with attribution; it never answers AS them.
 """
+import re
 import threading
 import time
 import uuid
@@ -20,8 +21,28 @@ class ToolError(Exception):
     """Bad arguments; the message goes back to the model so it can retry."""
 
 
+LEDGER = []   # every query this process sent to FalkorDB; the agent turns it into a receipt
+
+
+def _kind(query):
+    q = " ".join(query.split())
+    if "CALL algo." in q:
+        return "algorithm"
+    if "db.idx.fulltext" in q:
+        return "fulltext"
+    if re.search(r"\[[^\]]*\*[^\]]*\]", q):
+        return "traversal"          # variable-length path, e.g. -[:CHILD_OF*0..25]->
+    if re.search(r"\b(CREATE|DELETE|SET)\b", q):
+        return "write"
+    return "match"
+
+
 def _q(query, params=None, timeout=60000):
-    return graph().query(query, params or {}, timeout=timeout).result_set
+    t = time.perf_counter()
+    rows = graph().query(query, params or {}, timeout=timeout).result_set
+    LEDGER.append(dict(kind=_kind(query), rows=len(rows), ms=round((time.perf_counter() - t) * 1000, 2),
+                       cypher=" ".join(query.split())[:160]))
+    return rows
 
 
 def _person(handle):
@@ -128,10 +149,12 @@ def departure_impact(handle: str, also_leaving: list = None):
     rel = "APPROVES" if status == "active" else "EMERITUS_OF"
     areas = [r[0] for r in _q(f"""MATCH (p:Person)-[:{rel}]->(d:Dir) WHERE p.handle IN $gone
                                   RETURN DISTINCT d.path""", {"gone": sorted(gone)})]
+    left = dict(_q("""MATCH (d:Dir) WHERE d.path IN $areas
+                      OPTIONAL MATCH (x:Person {status:'active'})-[:APPROVES]->(d) WHERE NOT x.handle IN $gone
+                      RETURN d.path, collect(x.handle)""", {"areas": areas, "gone": sorted(gone)}))
     results = []
     for a in areas:
-        by = _approvers([a])
-        local = sorted(x for x, s in by[a]["APPROVES"] if x not in gone and s == "active")
+        local = sorted(left.get(a) or [])
         fallback = None
         if not local:
             for p in _chain(a)[1:]:
@@ -163,15 +186,16 @@ def heirs(handle: str, top: int = 5):
     ownership and how many decisions they shared, with the evidence for each."""
     h, _ = _person(handle)
     rows = _q("""MATCH (p:Person {handle:$h})-[w:WORKED_WITH]-(x:Person {status:'active'})
-                 RETURN x.handle, sum(w.weight) AS score ORDER BY score DESC LIMIT $k""", {"h": h, "k": max(1, min(int(top), 15))})
+                 RETURN x.handle, sum(w.weight) AS score ORDER BY score DESC, x.handle LIMIT $k""", {"h": h, "k": max(1, min(int(top), 15))})
     out = []
     for x, score in rows:
         shared = [r[0] for r in _q("""MATCH (:Person {handle:$h})-[:APPROVES|REVIEWS|EMERITUS_OF]->(d:Dir)<-[:APPROVES|REVIEWS]-(:Person {handle:$x})
-                                      RETURN DISTINCT d.path LIMIT 6""", {"h": h, "x": x})]
+                                      RETURN DISTINCT d.path ORDER BY d.path LIMIT 6""", {"h": h, "x": x})]
         holds = _q("""MATCH (:Person {handle:$h})-[:APPROVES|EMERITUS_OF]->(d:Dir)<-[:APPROVES]-(:Person {handle:$x})
                       RETURN count(DISTINCT d)""", {"h": h, "x": x})[0][0]
         decided = [r[0] for r in _q("""MATCH (:Person {handle:$h})-[:APPROVED|AUTHORED|REVIEWED]->(k:KEP)<-[:APPROVED|AUTHORED|REVIEWED]-(:Person {handle:$x})
-                                       RETURN DISTINCT 'KEP-' + k.number + ' ' + k.title LIMIT 3""", {"h": h, "x": x})]
+                                       WITH DISTINCT k ORDER BY toInteger(k.number) DESC
+                                       RETURN 'KEP-' + k.number + ' ' + k.title LIMIT 3""", {"h": h, "x": x})]
         out.append(dict(heir=x, score=round(score, 1), already_approves_their_areas=holds,
                         shared_areas=[_src_dir(p) for p in shared], shared_decisions=decided))
     return {"handle": h, "heirs": out, "method": "sum of shared OWNERS entries (1 each) and shared KEPs (0.5 each) on WORKED_WITH edges",
@@ -227,18 +251,17 @@ def shadow_teams(min_size: int = 5, top: int = 6):
     """Community detection (algo.labelPropagation) on who actually works with whom among
     active people, compared with the official teams. Shows the groups that cut across them."""
     with _proj_lock:
-        g = graph()
-        g.query("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
+        _q("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
         try:
             # each active person links to their 3 closest collaborators; plain weight
             # thresholds let the handful of project-wide approvers glue everyone into one blob
-            g.query("""MATCH (a:Person {status:'active'})-[w:WORKED_WITH]-(b:Person {status:'active'})
+            _q("""MATCH (a:Person {status:'active'})-[w:WORKED_WITH]-(b:Person {status:'active'})
                        WITH a, b, w.weight AS wt ORDER BY wt DESC
                        WITH a, collect(b)[0..3] AS top UNWIND top AS b CREATE (a)-[:ACTIVE_WITH]->(b)""")
-            rows = g.query("""CALL algo.labelPropagation({nodeLabels:['Person'], relationshipTypes:['ACTIVE_WITH'], maxIterations:30})
-                              YIELD node, communityId RETURN node.handle, communityId""", timeout=120000).result_set
+            rows = _q("""CALL algo.labelPropagation({nodeLabels:['Person'], relationshipTypes:['ACTIVE_WITH'], maxIterations:30})
+                              YIELD node, communityId RETURN node.handle, communityId""", timeout=120000)
         finally:
-            g.query("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
+            _q("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
     dir_team = _team_of_dirs()
     person_teams = defaultdict(lambda: defaultdict(int))
     for h, p in _q("MATCH (x:Person {status:'active'})-[:APPROVES|REVIEWS]->(d:Dir) RETURN x.handle, d.path"):
@@ -266,16 +289,15 @@ def keystone_people(top: int = 10):
     """Betweenness centrality on WORKED_WITH among active people: the people who connect
     groups that would otherwise not talk."""
     with _proj_lock:
-        g = graph()
-        g.query("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
+        _q("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
         try:
-            g.query("""MATCH (a:Person {status:'active'})-[w:WORKED_WITH]-(b:Person {status:'active'})
+            _q("""MATCH (a:Person {status:'active'})-[w:WORKED_WITH]-(b:Person {status:'active'})
                        WHERE w.weight >= 2 CREATE (a)-[:ACTIVE_WITH]->(b)""")
-            rows = g.query("""CALL algo.betweenness({nodeLabels:['Person'], relationshipTypes:['ACTIVE_WITH'], samplingSize:100000, samplingSeed:7})
+            rows = _q("""CALL algo.betweenness({nodeLabels:['Person'], relationshipTypes:['ACTIVE_WITH'], samplingSize:100000, samplingSeed:7})
                               YIELD node, score RETURN node.handle, score ORDER BY score DESC LIMIT $k""",
-                           {"k": max(1, min(int(top), 30))}, timeout=120000).result_set
+                           {"k": max(1, min(int(top), 30))}, timeout=120000)
         finally:
-            g.query("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
+            _q("MATCH ()-[r:ACTIVE_WITH]->() DELETE r")
     return {"keystones": [dict(handle=h, betweenness=round(s, 1)) for h, s in rows],
             "method": "algo.betweenness over WORKED_WITH (weight >= 2) among active people"}
 

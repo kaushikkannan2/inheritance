@@ -10,9 +10,14 @@ import sys
 
 import anthropic
 
-from . import tools
+from . import receipt, tools
 
 MODEL = os.environ.get("INHERITANCE_MODEL", "claude-opus-5-5")
+
+# The control arm for the grounding check: same model, same question, no graph.
+NO_GRAPH_SYSTEM = """You are an assistant answering questions about the Kubernetes project's
+maintainers, code ownership and design decisions from your own knowledge. Be specific: name
+people (GitHub handles), KEPs and code folders where you can. Keep the answer short."""
 
 SYSTEM = """You are Inheritance, the memory of an engineering organization: what people know,
 own and decided, and who carries it when they leave. Your only source of truth is a
@@ -62,40 +67,57 @@ def _run_tool(name, args, log):
         return f"Tool failed: {type(e).__name__}: {e}", True
 
 
-def ask(question, history=None, log=lambda s: print(s, file=sys.stderr), max_turns=20):
-    """Run one question through the tool loop. Returns (answer, messages, trace)."""
+def ask(question, history=None, log=lambda s: print(s, file=sys.stderr), max_turns=20, use_graph=True):
+    """Run one question through the tool loop. Returns (answer, messages, receipt).
+    use_graph=False sends the same question with no tools, as a control."""
     client = _client()
     messages = list(history or []) + [{"role": "user", "content": question}]
-    specs = tools.tool_specs()
-    trace = []
+    specs = tools.tool_specs() if use_graph else []
+    trace, outputs, start = [], [], len(tools.LEDGER)
+
+    def done(answer):
+        r = receipt.build(question, answer, trace, tools.LEDGER[start:], outputs, use_graph)
+        return answer, messages, r
+
     for _ in range(max_turns):
+        extra = {"tools": specs} if specs else {}
         response = client.beta.messages.create(
             model=MODEL,
             max_tokens=16000,
-            system=SYSTEM,
-            tools=specs,
+            system=SYSTEM if use_graph else NO_GRAPH_SYSTEM,
             messages=messages,
             thinking={"type": "adaptive"},
             output_config={"effort": "high"},
             betas=["server-side-fallback-2026-07-01"],
             fallbacks="default",
+            **extra,
         )
         if response.stop_reason == "refusal":
-            return "The model declined this request.", messages, trace
+            return done("The model declined this request.")
         messages.append({"role": "assistant", "content": response.content})
         if response.stop_reason == "max_tokens":
-            return "Stopped: the answer hit the token limit.", messages, trace
+            return done("Stopped: the answer hit the token limit.")
         uses = [b for b in response.content if b.type == "tool_use"]
         if not uses:
-            return "\n".join(b.text for b in response.content if b.type == "text"), messages, trace
+            return done("\n".join(b.text for b in response.content if b.type == "text"))
         results = []
         for u in uses:
             log(f"  → {u.name}({json.dumps(u.input)})")
             content, is_err = _run_tool(u.name, u.input, log)
             trace.append({"tool": u.name, "input": u.input, "error": is_err})
+            if not is_err:
+                outputs.append(content)
             results.append({"type": "tool_result", "tool_use_id": u.id, "content": content, "is_error": is_err})
         messages.append({"role": "user", "content": results})
-    return "Stopped after too many tool calls.", messages, trace
+    return done("Stopped after too many tool calls.")
+
+
+def _answer(q, history, use_graph=True):
+    answer, history, r = ask(q, history, use_graph=use_graph)
+    print("\n" + answer)
+    print(receipt.render(r), file=sys.stderr)
+    print(f"receipt saved: {receipt.save(r)}", file=sys.stderr)
+    return history
 
 
 def repl():
@@ -109,7 +131,7 @@ def repl():
         if not q:
             continue
         try:
-            answer, history, _ = ask(q, history)
+            history = _answer(q, history)
         except anthropic.AuthenticationError:
             print("\nThe API key was rejected. Create a new key in the Anthropic Console and export it again.")
             continue
@@ -124,11 +146,13 @@ def repl():
         except anthropic.APIConnectionError:
             print("\nCould not reach the Anthropic API. Check your internet connection.")
             continue
-        print("\n" + answer)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        print(ask(" ".join(sys.argv[1:]))[0])
+    args = sys.argv[1:]
+    use_graph = "--no-graph" not in args
+    args = [a for a in args if a != "--no-graph"]
+    if args:
+        _answer(" ".join(args), None, use_graph)
     else:
         repl()

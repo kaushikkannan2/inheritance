@@ -10,7 +10,7 @@ leaves with a person and who already carries it."
 **2. The data (0:20–0:40).** "This is real. Kubernetes is one of the largest engineering
 organizations in the world, and it keeps public records of who owns which code and who
 made which design decisions. When a maintainer steps away, their name moves to an emeritus
-list. That gives us 852 people, 585 code areas, 683 design decisions, and 140 real
+list. That gives us 853 people, 586 code areas, 683 design decisions, and 137 real
 departures." *Show the FalkorDB browser on lavalamp's neighbourhood.*
 
 **3. Who do I ask? (0:40–1:00).** Ask: *"Who do I ask about
@@ -34,7 +34,7 @@ do, and who can still explain it?"* "It finds the design decisions, who made the
 who's still around to ask."
 
 **7. Org health (2:25–2:45).** "Across the whole org, 45 areas depend on a single approver.
-Community detection finds the real teams. One group of 47 people spans eight official
+Community detection finds the real teams. One group of 48 people spans eight official
 teams. Betweenness centrality finds the keystones who connect everyone."
 
 **8. Responsible by design (2:45–3:00).** "Inheritance answers from people's public
