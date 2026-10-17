@@ -49,6 +49,12 @@ top = [h["heir"] for h in data["lavalamp"]["heirs"][:3]]
 data["handoff"] = dict(heirs=top, areas=[dict(area=a, held_by=[r[0] for r in tools._q(
     "MATCH (x:Person)-[:APPROVES]->(:Dir {path:$a}) WHERE x.handle IN $h RETURN x.handle ORDER BY x.handle", {"a": a, "h": top})])
     for a in HANDOFF])
+from inheritance import actions  # noqa: E402
+ho = actions.draft_handoff("thockin", write=False)
+data["handoff_plan"] = [dict(area=p["area"], left=p["left"], proposed=p["proposed"], because=p["because"][:2]) for p in ho["plan"]]
+first = next((p for p in ho["plan"] if p["proposed"]), None)
+data["patch_sample"] = actions._patch_owners(first["area"], first["proposed"]) if first else ""
+data["incremental"] = proof.get("incremental")
 for w in data["whatif"]:
     w["safe"] = w["areas"] - w["areas_with_no_local_approver"] - w["areas_down_to_one"]
 html = open("scripts/visuals_template.html").read().replace("__DATA__", json.dumps(data, default=str))

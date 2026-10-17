@@ -51,7 +51,7 @@ section > .wrap { display: flex; flex-direction: column; gap: 28px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; font: 500 0.78rem/1 var(--mono); padding: 6px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
 .chip.good { background: var(--good-bg); color: var(--good); } .chip.bad { background: var(--bad-bg); color: var(--bad); }
 .chip.warn { background: #3D3022; color: var(--warn); }
-.toggle { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.toggle { align-self: flex-start; display: inline-flex; background: var(--surface); border-radius: 999px; padding: 4px; gap: 4px; flex-wrap: wrap; }
 .toggle button { font: 600 0.9rem/1 var(--body); color: var(--ink-2); background: none; border: 0; padding: 10px 16px; border-radius: 999px; cursor: pointer; }
 .toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .src { font: 400 0.78rem/1.5 var(--mono); color: var(--ink-3); overflow-wrap: anywhere; }
@@ -101,6 +101,7 @@ svg text { font-family: var(--mono); }
 .rung .body { display: flex; flex-direction: column; gap: 6px; padding-bottom: 16px; min-width: 0; }
 .rung .path { font: 500 0.92rem/1.3 var(--mono); overflow-wrap: anywhere; }
 .people { display: flex; flex-wrap: wrap; gap: 6px; }
+.rung .chip { white-space: normal; line-height: 1.35; }
 
 /* bars */
 .bars { display: flex; flex-direction: column; gap: 10px; }
@@ -153,6 +154,22 @@ table.rc td.r, table.rc th.r { text-align: right; font-variant-numeric: tabular-
 .group .top b { font: 700 1.05rem/1.2 var(--display); }
 .list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .list li { display: flex; flex-direction: column; gap: 2px; }
+.timeline { display: flex; flex-direction: column; gap: 0; margin: 0; padding: 0; list-style: none; }
+.timeline li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto; gap: 14px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.timeline li:last-child { border-bottom: 0; }
+.timeline .d { font: 500 0.82rem/1.3 var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.timeline .t { min-width: 0; overflow-wrap: anywhere; }
+.timeline .t a { color: var(--ink); text-decoration: none; }
+.timeline .t a:hover { text-decoration: underline; }
+.timeline .n { font: 500 0.8rem/1 var(--mono); color: var(--ink-2); white-space: nowrap; }
+.timeline li.hot { background: var(--surface-2); border-radius: 10px; padding: 12px; margin: 4px 0; border-bottom: 0; }
+@media (max-width: 560px) { .timeline li { grid-template-columns: 1fr; gap: 4px; } }
+pre.patch { margin: 0; background: var(--bg); border-radius: 12px; padding: 14px 16px; overflow-x: auto; font: 400 0.84rem/1.5 var(--mono); color: var(--ink-2); }
+pre.patch .add { color: var(--good); } pre.patch .hd { color: var(--ink-3); }
+table.plan { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.plan th, table.plan td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.plan th { font: 500 0.74rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+table.plan td.a { font-family: var(--mono); font-size: 0.84rem; overflow-wrap: anywhere; }
 #tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--bg); font: 500 0.8rem/1.35 var(--mono); padding: 7px 9px; border-radius: 8px; max-width: 320px; }
 footer { padding-block: 48px 64px; }
 footer .wrap { display: flex; flex-direction: column; gap: 10px; }
@@ -161,7 +178,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 10px; }
 <nav class="chapters" aria-label="Chapters"><div class="wrap">
   <a class="brand" href="#top">Inheritance</a>
   <a href="#how">How it works</a><a href="#graph">The graph</a><a href="#ask">Who do I ask?</a>
-  <a href="#departure">A real departure</a><a href="#whatif">What if?</a><a href="#health">Org health</a><a href="#proof">Proof</a>
+  <a href="#departure">A real departure</a><a href="#live">Keeping current</a><a href="#whatif">What if?</a><a href="#acts">It acts</a><a href="#health">Org health</a><a href="#proof">Proof</a>
 </div></nav>
 
 <header class="hero" id="top"><div class="wrap">
@@ -213,6 +230,17 @@ footer .wrap { display: flex; flex-direction: column; gap: 10px; }
   </div>
 </div></section>
 
+<section id="live"><div class="wrap">
+  <div class="head"><p class="eyebrow">Keeping current</p><h2>Ownership changes land as pull requests. The graph absorbs each one.</h2>
+    <p class="lede">Load the graph as it was on any past date, then replay every merged PR that changed an OWNERS file. Only the folders a PR touched are rewritten, and each PR becomes a node that answers can cite.</p></div>
+  <div class="tiles" id="live-tiles"></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:12px">
+    <h3>Real ownership changes since August 20</h3>
+    <ul class="timeline" id="timeline"></ul>
+    <p class="src">python -m inheritance.sync · each row is a merged pull request in kubernetes/kubernetes</p>
+  </div>
+</div></section>
+
 <section id="whatif"><div class="wrap">
   <div class="head"><p class="eyebrow">What if?</p><h2 id="wi-title">If thockin left tomorrow</h2>
     <p class="lede">thockin is active. This is a resilience exercise on public records, not a prediction.</p>
@@ -236,6 +264,23 @@ footer .wrap { display: flex; flex-direction: column; gap: 10px; }
     <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Decisions that would lose their last voice</h3><ul class="list" id="wi-orph-list"></ul></div>
     <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Leadership seats</h3><div class="people" id="wi-seats"></div>
       <h3 style="margin-top:10px">Where a dark area falls back</h3><div id="wi-fall"></div></div>
+  </div>
+</div></section>
+
+<section id="acts"><div class="wrap">
+  <div class="head"><p class="eyebrow">It acts</p><h2>From "what would go dark" to a patch the project could merge</h2>
+    <p class="lede">draft_handoff proposes a successor for every area left with one approver or none. It chooses someone who already reviews that code or approves the folder above it. Then it writes a hand-off note and an OWNERS patch that applies cleanly with <span class="mono">git apply</span>.</p></div>
+  <div class="grid2" style="align-items:start">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <h3>Proposed successors if thockin left</h3>
+      <ul class="list" id="plan"></ul>
+      <p class="src">draft_handoff("thockin") · also saved to the graph as a :Handoff node</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <h3>The OWNERS patch it writes</h3>
+      <pre class="patch" id="patch"></pre>
+      <p class="src">one of the patch's 10 files · docs/examples/handoff-thockin.patch</p>
+    </div>
   </div>
 </div></section>
 
@@ -279,7 +324,7 @@ footer .wrap { display: flex; flex-direction: column; gap: 10px; }
       <p class="answer" id="g-true"></p>
       <div class="verdict"><span class="chip bad" id="g-bad"></span><span class="muted" style="font-size:.86rem">an invented answer</span></div>
       <p class="answer" id="g-false"></p>
-      <p class="src">Each person, design decision and folder an answer names must have been returned by FalkorDB in that session. Anything else came from the model's memory and is flagged.</p>
+      <p class="src">Each person, design decision and folder an answer names must have come from FalkorDB: from a tool call in that session, or from the graph-memory brief read at session start. Anything else came from the model's own memory and is flagged. Real agent runs scored 27/27, 30/30 and 16/16.</p>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:12px">
       <h3>Graph receipts</h3>
@@ -354,10 +399,10 @@ $('facts').innerHTML = [[fmt(D.status.active + D.status.emeritus + D.status.unli
 const R = D.proof.receipts;
 $('pipe').innerHTML = [
   ['Public records', 'Three Kubernetes repositories, pinned to exact commits.', [`${fmt(P.owners_files_on_disk)} OWNERS files`, 'sigs.yaml: teams and leads', `${fmt(D.keps)} design decisions (KEPs)`]],
-  ['Loader', 'Parses the files into people, folders, teams and decisions. Handles only, no personal data.', ['expands aliases', 'links each folder to its parent', 'scores who worked with whom']],
+  ['Loader and sync', 'Parses the files into people, folders, teams and decisions, then replays each merged ownership PR. Handles only.', ['links each folder to its parent', 'scores who worked with whom', 'rewrites only what a PR touched']],
   ['FalkorDB graph', 'Holds every relationship. Answers by traversal and graph algorithms.', [`${fmt(Object.values(P.nodes).reduce((a, b) => a + b, 0))} nodes`, `${fmt(Object.values(P.edges).reduce((a, b) => a + b, 0))} edges`, 'label propagation, betweenness, full-text']],
-  ['12 fixed tools', 'Written Cypher, never generated. Every name is checked against the graph.', ['who_approves · departure_impact', 'heirs · why · shadow_teams', 'keystone_people · memory']],
-  ['Claude agent', 'Chooses tools, reads results, writes the answer with sources.', ['answer cites OWNERS files and KEPs', 'graph receipt on every answer', 'grounding check flags guesses']],
+  ['17 fixed tools', 'Written Cypher, never generated. Every name is checked against the graph.', ['who_approves · who_knows · why', 'departure_impact · heirs · draft_handoff', 'shadow_teams · keystone_people · memory']],
+  ['Claude agent', 'Chooses tools, answers with sources, and acts: hand-off notes, OWNERS patches, routed questions.', ['answer cites OWNERS files, KEPs and PRs', 'graph receipt on every answer', 'grounding check flags guesses']],
 ].map(([h, p, li], i) => `<div class="step${i === 2 ? ' graph' : ''}"><span class="n">${i + 1} / 5</span><h3>${h}</h3><p>${p}</p><ul>${li.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('');
 
 // schema
@@ -494,6 +539,25 @@ $('g-false').innerHTML = mark('lavalamp handed pkg/scheduler to bgrant0607 after
 $('g-ok').textContent = `${G.t.score} from the graph`;
 $('g-bad').textContent = `${flagged.length} flagged`;
 $('rc').innerHTML = `<thead><tr><th>Tool</th><th class="r">Queries</th><th class="r">ms</th><th>What ran</th></tr></thead><tbody>${R.map(r => `<tr><td class="mono">${r.tool}${r.args.also_leaving ? ' (group)' : ''}</td><td class="r">${fmt(r.queries)}</td><td class="r">${fmt(Math.round(r.ms))}</td><td class="muted" style="font-size:.84rem">${Object.entries(r.by_kind).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(' · ')}</td></tr>`).join('')}</tbody>`;
+
+// keeping current
+const I = D.incremental;
+if (I) {
+  const total = I.prs.reduce((a, p) => a + p.folders, 0);
+  $('live-tiles').innerHTML = [[I.prs.length, 'merged ownership PRs replayed', ''], [total, 'folder updates applied, one PR at a time', ''],
+    [`${Object.values(I.checks).filter(c => c.equal).length} of ${Object.keys(I.checks).length}`, 'checks equal a fresh load of the same commit', 'good'],
+    ['1', 'stale record flagged after a real departure', 'warn']]
+    .map(([b, t, c]) => `<div class="tile ${c}"><b>${b}</b><span>${t}</span></div>`).join('');
+  $('timeline').innerHTML = I.prs.map(p => {
+    const hot = p.pr === '142237';
+    return `<li class="${hot ? 'hot' : ''}"><span class="d">${p.date}</span><span class="t"><a href="https://github.com/kubernetes/kubernetes/pull/${p.pr}">#${p.pr} · ${esc(p.title)}</a>${hot ? '<br><span class="muted" style="font-size:.86rem">rexagod steps back from 30 code areas. Every one still has six approvers, and the graph flags that sigs.yaml still lists rexagod as SIG Instrumentation lead.</span>' : ''}</span><span class="n">${p.folders} folder${p.folders === 1 ? '' : 's'}</span></li>`;
+  }).join('');
+}
+
+// it acts
+const why = b => b.replace(/ \(kubernetes\/kubernetes\/[^)]*\)/, '').replace(/ \(shared weight [^)]*\)/, '');
+$('plan').innerHTML = D.handoff_plan.map(p => `<li style="padding-bottom:10px;border-bottom:1px solid var(--line)"><span class="mono" style="font-size:.86rem;overflow-wrap:anywhere">${esc(p.area)}/</span><span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:.9rem">${p.left.length ? `<span class="chip warn">left: ${esc(p.left.join(', '))}</span>` : '<span class="chip bad">left: nobody</span>'}<span class="muted">→</span><b>${esc(p.proposed || '-')}</b></span><span class="muted" style="font-size:.82rem">${esc(p.because.map(why).join(' · '))}</span></li>`).join('');
+$('patch').innerHTML = esc(D.patch_sample).split('\n').map(l => l.startsWith('+') && !l.startsWith('+++') ? `<span class="add">${l}</span>` : (l.startsWith('---') || l.startsWith('+++') || l.startsWith('@@')) ? `<span class="hd">${l}</span>` : l).join('\n');
 
 // tooltips
 const tip = $('tip');
