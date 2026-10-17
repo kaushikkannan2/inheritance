@@ -8,11 +8,13 @@ Sources (all public, Apache 2.0):
 People are GitHub handles only. Names, employers and emails in sigs.yaml are never loaded.
 
   python -m inheritance.load --reset
+  python -m inheritance.load --reset --as-of 2026-08-20   # then: python -m inheritance.sync
 """
 import argparse
 import glob
 import os
 import re
+import subprocess
 from collections import defaultdict
 from itertools import combinations
 
@@ -36,45 +38,59 @@ def _batches(rows):
 
 # ------------------------------------------------------------------ parse
 
-def parse_owners(root=f"{RAW}/k8s"):
-    aliases = (yaml.safe_load(open(f"{root}/OWNERS_ALIASES")) or {}).get("aliases", {})
+def parse_aliases(text):
+    return (yaml.safe_load(text or "") or {}).get("aliases", {}) or {}
 
+
+def parse_owners_text(text, aliases):
+    """One OWNERS file -> who approves, reviews and stepped away. None if unparseable."""
     def expand(lst):
         out = []
         for x in lst or []:
             x = str(x).strip()
             out += [_handle(y) for y in aliases[x]] if x in aliases else [_handle(x)]
         return [o for o in out if o]
+    try:
+        d = yaml.safe_load(text) or {}
+    except yaml.YAMLError:
+        return None
+    if not isinstance(d, dict):
+        return None
+    if "filters" in d:  # per-file-pattern sections: union them
+        appr, rev = [], []
+        for f in (d.get("filters") or {}).values():
+            appr += expand((f or {}).get("approvers"))
+            rev += expand((f or {}).get("reviewers"))
+    else:
+        appr, rev = expand(d.get("approvers")), expand(d.get("reviewers"))
+    return dict(
+        approvers=sorted(set(appr)), reviewers=sorted(set(rev) - set(appr)),
+        emeritus=sorted(set(expand(d.get("emeritus_approvers")) + expand(d.get("emeritus_reviewers")))),
+        no_parent=bool((d.get("options") or {}).get("no_parent_owners")),
+        labels=[str(l) for l in d.get("labels") or []])
 
+
+def nearest_parent(path, existing):
+    """The nearest ancestor folder that has its own OWNERS file."""
+    cur = path
+    while cur not in (".", ""):
+        cur = os.path.dirname(cur) or "."
+        if cur in existing:
+            return cur
+    return None
+
+
+def parse_owners(root=f"{RAW}/k8s"):
+    aliases = parse_aliases(open(f"{root}/OWNERS_ALIASES").read())
     dirs = {}
     files = [os.path.join(d, "OWNERS") for d, sub, fs in os.walk(root) if "OWNERS" in fs and ".git" not in d.split(os.sep)]
     for p in files:  # os.walk, not glob: glob skips hidden folders such as .github
-        try:
-            d = yaml.safe_load(open(p)) or {}
-        except yaml.YAMLError:
+        spec = parse_owners_text(open(p).read(), aliases)
+        if spec is None:
             continue
-        if "filters" in d:  # per-file-pattern sections: union them
-            appr, rev = [], []
-            for f in (d.get("filters") or {}).values():
-                appr += expand((f or {}).get("approvers"))
-                rev += expand((f or {}).get("reviewers"))
-        else:
-            appr, rev = expand(d.get("approvers")), expand(d.get("reviewers"))
-        path = os.path.dirname(p)[len(root):].lstrip("/") or "."
-        dirs[path] = dict(
-            approvers=sorted(set(appr)), reviewers=sorted(set(rev) - set(appr)),
-            emeritus=sorted(set(expand(d.get("emeritus_approvers")) + expand(d.get("emeritus_reviewers")))),
-            no_parent=bool((d.get("options") or {}).get("no_parent_owners")),
-            labels=[str(l) for l in d.get("labels") or []])
-    # parent = nearest ancestor directory that has its own OWNERS file
+        dirs[os.path.dirname(p)[len(root):].lstrip("/") or "."] = spec
     for path in dirs:
-        parent, cur = None, path
-        while cur not in (".", ""):
-            cur = os.path.dirname(cur) or "."
-            if cur in dirs:
-                parent = cur
-                break
-        dirs[path]["parent"] = parent
+        dirs[path]["parent"] = nearest_parent(path, dirs)
     return dirs
 
 
@@ -135,15 +151,31 @@ def parse_keps(root=f"{RAW}/enhancements/keps"):
 
 # ------------------------------------------------------------------ load
 
-def load(reset=False):
-    g = graph()
+def _git(*args, root=f"{RAW}/k8s"):
+    return subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, check=True).stdout.strip()
+
+
+def load(reset=False, name=None, as_of=None):
+    """Build the graph. as_of (YYYY-MM-DD) loads the OWNERS files as they were on that date;
+    inheritance.sync can then replay every ownership change since."""
+    if as_of:
+        here = _git("rev-parse", "HEAD")
+        rev = _git("rev-list", "-1", "--first-parent", f"--before={as_of}T23:59:59Z", here)
+        if not rev:
+            raise SystemExit(f"No commit on or before {as_of} in data/raw/k8s; fetch more history (scripts/fetch_data.sh)")
+        _git("checkout", "-q", rev)
+        try:
+            return load(reset, name)
+        finally:
+            _git("checkout", "-q", here)
+    g = graph(name) if name else graph()
     if reset:
         try:
             g.delete()
         except Exception:
             pass
-        g = graph()
-    for label, prop in [("Person", "handle"), ("Dir", "path"), ("Team", "id"), ("KEP", "number"), ("Subproject", "id")]:
+        g = graph(name) if name else graph()
+    for label, prop in [("Person", "handle"), ("Dir", "path"), ("Team", "id"), ("KEP", "number"), ("Subproject", "id"), ("Change", "sha")]:
         try:
             g.query(f"CREATE INDEX FOR (n:{label}) ON (n.{prop})")
         except Exception as e:
@@ -218,6 +250,9 @@ def load(reset=False):
     for b in _batches(rows):
         g.query("""UNWIND $rows AS r MATCH (a:Person {handle:r.a}), (b:Person {handle:r.b})
                    CREATE (a)-[:WORKED_WITH {weight:r.w}]->(b)""", {"rows": b})
+    sha = _git("rev-parse", "HEAD")
+    g.query("MERGE (s:Source {repo:'kubernetes/kubernetes'}) SET s.sha = $sha, s.date = $date, s.loaded = $date",
+            {"sha": sha, "date": _git("log", "-1", "--format=%cs", sha)})
     try:
         g.query("CALL db.idx.fulltext.createNodeIndex('KEP', 'title')")
     except Exception as e:
@@ -230,4 +265,6 @@ def load(reset=False):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--reset", action="store_true")
-    print(load(ap.parse_args().reset))
+    ap.add_argument("--as-of", help="load OWNERS files as they were on this date (YYYY-MM-DD)")
+    a = ap.parse_args()
+    print(load(a.reset, as_of=a.as_of))

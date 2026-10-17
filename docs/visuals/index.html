@@ -1,0 +1,507 @@
+<title>Inheritance</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one long story, a sticky chapter bar; each chapter is one idea and one picture. Single warm-dark look, shared with the slide deck. */
+:root {
+  color-scheme: dark;
+  --bg: #1C1A19; --surface: #2A2622; --surface-2: #332D28; --line: #3E3731;
+  --ink: #F3EADB; --ink-2: #CDBFAD; --ink-3: #9C8F80;
+  --accent: #F2B467; --accent-ink: #1C1A19;
+  --bad: #E8664F; --bad-bg: #3E2522; --warn: #F2B467; --good: #7FBF86; --good-bg: #22302A;
+  --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.3rem, 6vw, 4.4rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.5rem); font-weight: 800; line-height: 1.08; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--ink-2); font-size: 1.12rem; max-width: 62ch; }
+.muted { color: var(--ink-3); }
+.mono { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+nav.chapters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+nav.chapters .wrap { display: flex; gap: 4px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+nav.chapters a { flex: none; font: 500 0.82rem/1 var(--body); color: var(--ink-2); text-decoration: none; padding: 8px 12px; border-radius: 999px; }
+nav.chapters a:hover { background: var(--surface); color: var(--ink); }
+nav.chapters a.brand { font-family: var(--display); font-weight: 800; color: var(--ink); }
+
+section { padding-block: clamp(48px, 8vw, 88px); border-bottom: 1px solid var(--line); }
+section > .wrap { display: flex; flex-direction: column; gap: 28px; }
+.head { display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--surface); border-radius: 18px; padding: 24px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 16px; }
+.tile { background: var(--surface); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
+.tile b { font: 800 2.4rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.tile span { color: var(--ink-2); font-size: 0.92rem; }
+.tile.bad b { color: var(--bad); } .tile.good b { color: var(--good); } .tile.warn b { color: var(--warn); }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 500 0.78rem/1 var(--mono); padding: 6px 9px; border-radius: 999px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.chip.good { background: var(--good-bg); color: var(--good); } .chip.bad { background: var(--bad-bg); color: var(--bad); }
+.chip.warn { background: #3D3022; color: var(--warn); }
+.toggle { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 4px; gap: 4px; flex-wrap: wrap; }
+.toggle button { font: 600 0.9rem/1 var(--body); color: var(--ink-2); background: none; border: 0; padding: 10px 16px; border-radius: 999px; cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.src { font: 400 0.78rem/1.5 var(--mono); color: var(--ink-3); overflow-wrap: anywhere; }
+
+/* hero */
+.hero { padding-block: clamp(40px, 7vw, 80px) clamp(40px, 6vw, 64px); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 40px; align-items: center; }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } }
+.hero .copy { display: flex; flex-direction: column; gap: 20px; }
+.hero .facts { display: flex; gap: 22px; flex-wrap: wrap; }
+.hero .facts div { display: flex; flex-direction: column; }
+.hero .facts b { font: 800 1.9rem/1 var(--display); font-variant-numeric: tabular-nums; }
+.hero .facts span { font-size: 0.85rem; color: var(--ink-3); }
+.handoff { background: var(--surface); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.handoff svg { width: 100%; height: auto; display: block; }
+.handoff .cap { color: var(--ink-2); font-size: 0.92rem; min-height: 3em; }
+svg text { font-family: var(--mono); }
+.edge { transition: opacity .5s ease, stroke-dashoffset .6s ease; }
+@media (prefers-reduced-motion: reduce) { .edge, .fade { transition: none !important; } }
+.fade { transition: opacity .5s ease; }
+
+/* pipeline */
+.pipe { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .pipe { grid-template-columns: 1fr; } }
+.step { background: var(--surface); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+.step .n { font: 500 0.75rem/1 var(--mono); color: var(--accent); }
+.step h3 { font-size: 1.05rem; }
+.step p { color: var(--ink-2); font-size: 0.9rem; }
+.step ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.step li { font: 400 0.8rem/1.35 var(--mono); color: var(--ink-2); }
+.step.graph { background: var(--surface-2); outline: 2px solid var(--accent); }
+.step.graph .n { color: var(--accent); }
+
+/* schema */
+.schema { overflow-x: auto; }
+.schema svg { min-width: 760px; width: 100%; height: auto; display: block; }
+
+/* climb */
+.climb { display: flex; flex-direction: column; gap: 0; }
+.rung { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; align-items: start; }
+.rung .rail { display: flex; flex-direction: column; align-items: center; height: 100%; }
+.rung .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--ink-3); background: var(--bg); margin-top: 4px; flex: none; }
+.rung .bar { width: 2px; flex: 1; background: var(--line); min-height: 18px; }
+.rung.hit .dot { background: var(--good); border-color: var(--good); }
+.rung.skip .dot { border-color: var(--warn); }
+.rung.file .dot { border-radius: 3px; border-color: var(--ink-2); }
+.rung .body { display: flex; flex-direction: column; gap: 6px; padding-bottom: 16px; min-width: 0; }
+.rung .path { font: 500 0.92rem/1.3 var(--mono); overflow-wrap: anywhere; }
+.people { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* bars */
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.brow { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 5.5rem; gap: 12px; align-items: center; }
+.brow .who { font: 500 0.9rem/1.2 var(--mono); overflow: hidden; text-overflow: ellipsis; }
+.brow .track { height: 14px; background: var(--surface-2); border-radius: 4px; position: relative; }
+.brow .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 4px; }
+.brow .val { font: 500 0.85rem/1 var(--mono); color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .brow { grid-template-columns: 6.5rem minmax(0, 1fr) 4.2rem; } }
+
+/* waffle */
+.waffle { display: grid; grid-template-columns: repeat(auto-fill, 15px); gap: 3px; }
+.waffle i { width: 15px; height: 15px; border-radius: 3px; background: var(--good); opacity: .55; display: block; }
+.waffle i.thin { background: var(--warn); opacity: 1; }
+.waffle i.dark { background: var(--bad); opacity: 1; background-image: repeating-linear-gradient(45deg, transparent 0 3px, rgba(0,0,0,.35) 3px 5px); }
+.waffle i.orph { background: var(--bad); opacity: 1; }
+.waffle i.kept { background: var(--ink-3); opacity: .45; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.86rem; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* histogram */
+.hist svg { width: 100%; height: auto; display: block; }
+
+/* matrix */
+.matrix { overflow-x: auto; }
+.matrix table { border-collapse: separate; border-spacing: 4px; min-width: 720px; width: 100%; }
+.matrix th { font: 500 0.74rem/1.2 var(--mono); color: var(--ink-2); text-align: center; padding: 6px 2px; vertical-align: bottom; }
+.matrix th.q { text-align: left; font: 500 0.88rem/1.3 var(--body); color: var(--ink); padding-right: 12px; white-space: nowrap; }
+.matrix td { height: 34px; border-radius: 6px; background: var(--surface-2); text-align: center; font: 600 0.8rem/1 var(--mono); }
+.matrix td.hit { background: var(--accent); color: var(--accent-ink); }
+
+/* grounding */
+.answer { font-size: 1.02rem; line-height: 1.9; color: var(--ink-2); }
+.answer mark { background: none; color: var(--ink); padding: 1px 3px; border-radius: 4px; }
+.answer mark.ok { box-shadow: inset 0 -2px 0 var(--good); }
+.answer mark.no { background: var(--bad-bg); color: var(--bad); text-decoration: line-through; }
+.verdict { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+table.rc { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+table.rc th, table.rc td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+table.rc th { font: 500 0.74rem/1 var(--mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+table.rc td.r, table.rc th.r { text-align: right; font-variant-numeric: tabular-nums; }
+.rcwrap { overflow-x: auto; }
+
+.groups { display: flex; flex-direction: column; gap: 14px; }
+.group { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.group:last-child { border-bottom: 0; padding-bottom: 0; }
+.group .top { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.group .top b { font: 700 1.05rem/1.2 var(--display); }
+.list { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.list li { display: flex; flex-direction: column; gap: 2px; }
+#tip { position: fixed; pointer-events: none; z-index: 20; background: var(--ink); color: var(--bg); font: 500 0.8rem/1.35 var(--mono); padding: 7px 9px; border-radius: 8px; max-width: 320px; }
+footer { padding-block: 48px 64px; }
+footer .wrap { display: flex; flex-direction: column; gap: 10px; }
+</style>
+
+<nav class="chapters" aria-label="Chapters"><div class="wrap">
+  <a class="brand" href="#top">Inheritance</a>
+  <a href="#how">How it works</a><a href="#graph">The graph</a><a href="#ask">Who do I ask?</a>
+  <a href="#departure">A real departure</a><a href="#whatif">What if?</a><a href="#health">Org health</a><a href="#proof">Proof</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div class="copy">
+    <p class="eyebrow">Graph Hacks · Track 3 · FalkorDB</p>
+    <h1>When someone leaves, what leaves with them?</h1>
+    <p class="lede">Inheritance maps who owns which code, who made which decisions, and who works with whom. Then it shows what a departure takes away, and who already carries it.</p>
+    <div class="facts" id="facts"></div>
+    <p class="muted" style="font-size:.9rem">Real public records from Kubernetes, one of the largest engineering organizations in open source. When a maintainer steps away, their name moves to an <span class="mono">emeritus</span> list. That is a real history of people leaving.</p>
+  </div>
+  <div class="handoff">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <p class="eyebrow" style="color:var(--ink-3)">lavalamp's code, then and now</p>
+      <div class="toggle" role="group" aria-label="Then or now">
+        <button type="button" id="h-then" aria-pressed="false">Then</button>
+        <button type="button" id="h-now" aria-pressed="true">Now</button>
+      </div>
+    </div>
+    <svg id="hand" viewBox="0 0 560 360" role="img" aria-label="Six code areas once approved by lavalamp, now approved by deads2k, liggitt and sttts"></svg>
+    <p class="cap" id="hand-cap"></p>
+  </div>
+</div></header>
+
+<section id="how"><div class="wrap">
+  <div class="head"><p class="eyebrow">How it works</p><h2>Public records in, a cited answer out</h2></div>
+  <div class="pipe" id="pipe"></div>
+</div></section>
+
+<section id="graph"><div class="wrap">
+  <div class="head"><p class="eyebrow">The graph</p><h2>Five kinds of things, fifteen kinds of connection</h2>
+    <p class="lede">Every connection comes from a file you can open. Counts are from the loaded graph.</p></div>
+  <div class="card schema"><svg id="schema" viewBox="0 0 900 470" role="img" aria-label="Graph data model"></svg></div>
+</div></section>
+
+<section id="ask"><div class="wrap">
+  <div class="head"><p class="eyebrow">Who do I ask?</p><h2>Ownership is inherited up the folder tree</h2>
+    <p class="lede">To find who approves a file, climb from its folder to the nearest OWNERS file that names approvers. Some OWNERS files name only reviewers, so the climb continues along the tree's parent links.</p></div>
+  <div class="grid2" id="climbs"></div>
+</div></section>
+
+<section id="departure"><div class="wrap">
+  <div class="head"><p class="eyebrow">A real departure</p><h2>lavalamp stepped back. Nothing went dark.</h2>
+    <p class="lede" id="lav-lede"></p></div>
+  <div class="tiles" id="lav-tiles"></div>
+  <div class="card" style="display:flex;flex-direction:column;gap:16px">
+    <div><h3>Who carries it now</h3><p class="muted" style="font-size:.9rem">Of lavalamp's 31 former code areas, how many each person approves today</p></div>
+    <div class="bars" id="heirs"></div>
+    <p class="src">heirs("lavalamp") · ranked by shared OWNERS entries and shared design decisions</p>
+  </div>
+</div></section>
+
+<section id="whatif"><div class="wrap">
+  <div class="head"><p class="eyebrow">What if?</p><h2 id="wi-title">If thockin left tomorrow</h2>
+    <p class="lede">thockin is active. This is a resilience exercise on public records, not a prediction.</p>
+    <div class="toggle" role="group" aria-label="Who leaves">
+      <button type="button" id="wi-0" aria-pressed="true">thockin alone</button>
+      <button type="button" id="wi-1" aria-pressed="false">with liggitt and deads2k</button>
+    </div></div>
+  <div class="grid2">
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <h3 id="wi-areas-h"></h3>
+      <div class="waffle" id="wi-areas" aria-label="Code areas, one square each"></div>
+      <div class="legend"><span><i style="background:var(--bad)"></i><b id="wi-dark"></b>&nbsp;no local approver left</span><span><i style="background:var(--warn)"></i><b id="wi-thin"></b>&nbsp;down to one person</span><span><i style="background:var(--good);opacity:.55"></i><b id="wi-safe"></b>&nbsp;two or more remain</span></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <h3 id="wi-dec-h"></h3>
+      <div class="waffle" id="wi-dec" aria-label="Design decisions, one square each"></div>
+      <div class="legend"><span><i style="background:var(--bad)"></i><b id="wi-orph"></b>&nbsp;nobody active left who wrote or approved it</span><span><i style="background:var(--ink-3);opacity:.45"></i>someone remains</span></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Decisions that would lose their last voice</h3><ul class="list" id="wi-orph-list"></ul></div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px"><h3>Leadership seats</h3><div class="people" id="wi-seats"></div>
+      <h3 style="margin-top:10px">Where a dark area falls back</h3><div id="wi-fall"></div></div>
+  </div>
+</div></section>
+
+<section id="health"><div class="wrap">
+  <div class="head"><p class="eyebrow">Org health</p><h2>The real teams, the keystones, the thin spots</h2></div>
+  <div class="grid2">
+    <div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div><h3>Shadow teams</h3><p class="muted" style="font-size:.9rem">Community detection on who actually works together, compared with official teams</p></div>
+      <div class="groups" id="shadow"></div>
+      <p class="src">algo.labelPropagation · each person's official team is the team owning most of the code they approve or review</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div class="card" style="display:flex;flex-direction:column;gap:14px">
+        <div><h3>Keystones</h3><p class="muted" style="font-size:.9rem">People who connect groups that would otherwise not talk</p></div>
+        <div class="bars" id="keys"></div>
+        <p class="src">algo.betweenness over active collaborators</p>
+      </div>
+      <div class="tiles" id="health-tiles"></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="proof"><div class="wrap">
+  <div class="head"><p class="eyebrow">Proof</p><h2>FalkorDB is doing the work. Here are the checks.</h2>
+    <p class="lede">Every check runs without the language model: <span class="mono">python scripts/prove_graph.py</span>.</p></div>
+  <div class="tiles" id="proof-tiles"></div>
+
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <div><h3>How far each file's answer lives from the file</h3><p class="muted" style="font-size:.9rem" id="hist-sub"></p></div>
+    <div class="hist"><svg id="hist" viewBox="0 0 900 260" role="img" aria-label="Files by number of folders climbed"></svg></div>
+  </div>
+
+  <div class="card" style="display:flex;flex-direction:column;gap:14px">
+    <div><h3>Take one kind of connection away, and answers change</h3><p class="muted" style="font-size:.9rem">On a copy of the graph, delete one relationship type, then ask the ten headline questions again. A filled cell means that answer changed.</p></div>
+    <div class="matrix" id="matrix"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div class="verdict"><h3>Grounding check</h3><span class="chip good" id="g-ok"></span></div>
+      <p class="answer" id="g-true"></p>
+      <div class="verdict"><span class="chip bad" id="g-bad"></span><span class="muted" style="font-size:.86rem">an invented answer</span></div>
+      <p class="answer" id="g-false"></p>
+      <p class="src">Each person, design decision and folder an answer names must have been returned by FalkorDB in that session. Anything else came from the model's memory and is flagged.</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <h3>Graph receipts</h3>
+      <div class="rcwrap"><table class="rc" id="rc"></table></div>
+      <p class="src">Every agent answer ends with a receipt like these, saved to out/receipts/</p>
+    </div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <h3>Answers from people's public record, with attribution. Never as them.</h3>
+  <p class="muted">GitHub handles only; names, employers and emails are never loaded. Built with FalkorDB and Claude. Code, data model, queries and setup: <a href="https://github.com/kaushikkannan2/inheritance">github.com/kaushikkannan2/inheritance</a></p>
+</div></footer>
+<div id="tip" hidden></div>
+
+<script>
+const D = {"proof": {"integrity": {"nodes": {"Person": 853, "Dir": 586, "Subproject": 241, "KEP": 679, "Team": 37}, "edges": {"EMERITUS_OF": 318, "PART_OF": 241, "REPLACES": 8, "INVOLVES": 469, "LED": 124, "REVIEWED": 1964, "REVIEWS": 3104, "OWNED_BY": 683, "APPROVED": 1305, "APPROVES": 2619, "LEADS": 174, "AUTHORED": 1148, "OWNS": 150, "WORKED_WITH": 11613, "CHILD_OF": 585}, "owners_files_on_disk": 586}, "correctness": {"files": 31441, "folders": 5110, "agree": 31441, "agree_pct": 100.0, "hops": {"0": 3333, "1": 4036, "2": 8328, "3": 3021, "4": 4652, "5": 6825, "6": 783, "7": 301, "8": 142, "9": 15, "10": 5}, "need_climb": 28108, "need_climb_pct": 89.4, "via_child_of": 1829, "seconds": 49.5}, "ablation": {"questions": ["who approves kubelet code", "who approves core API validation", "what lavalamp left", "lavalamp's heirs", "if thockin left", "who can explain sidecars", "single points of failure", "orphaned decisions", "shadow teams", "keystones"], "without": {"CHILD_OF": ["who approves core API validation", "if thockin left", "single points of failure", "shadow teams"], "APPROVES": ["who approves kubelet code", "who approves core API validation", "if thockin left", "single points of failure"], "EMERITUS_OF": ["what lavalamp left"], "WORKED_WITH": ["lavalamp's heirs", "shadow teams", "keystones"], "AUTHORED": ["what lavalamp left", "if thockin left", "who can explain sidecars", "orphaned decisions"], "APPROVED": ["what lavalamp left", "if thockin left", "who can explain sidecars", "orphaned decisions"], "LEADS": ["if thockin left"], "OWNS": ["shadow teams"]}}, "grounding": {"t": {"people": {"grounded": ["deads2k", "lavalamp", "liggitt"], "not_from_graph": []}, "keps": {"grounded": ["4020"], "not_from_graph": []}, "paths": {"grounded": ["pkg/registry"], "not_from_graph": []}, "score": "5/5", "all_grounded": true}, "f": {"people": {"grounded": ["lavalamp"], "not_from_graph": ["bgrant0607"]}, "keps": {"grounded": [], "not_from_graph": ["9999"]}, "paths": {"grounded": [], "not_from_graph": ["pkg/scheduler"]}, "score": "1/4", "all_grounded": false}}, "receipts": [{"tool": "who_approves", "args": {"path": "pkg/kubelet/kuberuntime/kuberuntime_container.go"}, "queries": 3, "by_kind": {"match": 2, "traversal": 1}, "rows": 46, "ms": 9.1}, {"tool": "departure_impact", "args": {"handle": "thockin"}, "queries": 7, "by_kind": {"match": 6, "traversal": 1}, "rows": 395, "ms": 38.9}, {"tool": "departure_impact", "args": {"handle": "thockin", "also_leaving": ["liggitt", "deads2k"]}, "queries": 9, "by_kind": {"match": 8, "traversal": 1}, "rows": 737, "ms": 65.3}, {"tool": "heirs", "args": {"handle": "lavalamp"}, "queries": 17, "by_kind": {"match": 17}, "rows": 56, "ms": 57.3}, {"tool": "why", "args": {"topic": "sidecar containers"}, "queries": 7, "by_kind": {"fulltext": 1, "match": 6}, "rows": 14, "ms": 21.7}, {"tool": "single_points_of_failure", "args": {}, "queries": 2, "by_kind": {"traversal": 1, "match": 1}, "rows": 16, "ms": 15.2}, {"tool": "orphaned_knowledge", "args": {}, "queries": 3, "by_kind": {"match": 3}, "rows": 6, "ms": 17.9}, {"tool": "shadow_teams", "args": {}, "queries": 593, "by_kind": {"write": 3, "algorithm": 1, "match": 3, "traversal": 586}, "rows": 9498, "ms": 1735.2}, {"tool": "keystone_people", "args": {}, "queries": 4, "by_kind": {"write": 3, "algorithm": 1}, "rows": 10, "ms": 350.5}]}, "status": {"emeritus": 137, "active": 264, "unlisted": 452}, "keps": 679, "who": [{"file": "pkg/kubelet/kuberuntime/kuberuntime_container.go", "steps": [{"path": "pkg/kubelet", "approvers": 9, "former": ["dashpole", "vishh"]}], "answer": {"owners_file": "kubernetes/kubernetes/pkg/kubelet/OWNERS", "approvers": ["dchen1107", "derekwaynecarr", "klueska", "mrunalp", "random-liu", "sergeykanzhelev", "sjenning", "tallclair", "yujuhong"], "reviewers": ["andrewsykim", "bart0sh", "bobbypage", "dims", "endocrimes", "feiskyer", "ffromani", "haircommander", "harche", "hirazawaui", "kannon92", "krmayankk"], "former_approvers": ["dashpole", "vishh"]}}, {"file": "pkg/apis/core/validation/validation.go", "steps": [{"path": "pkg/apis/core/validation", "approvers": 0, "former": []}, {"path": "pkg/apis/core", "approvers": 0, "former": []}, {"path": "pkg/apis", "approvers": 6, "former": []}], "answer": {"owners_file": "kubernetes/kubernetes/pkg/apis/OWNERS", "approvers": ["deads2k", "jpbetz", "liggitt", "msau42", "smarterclayton", "thockin"], "reviewers": ["andrewsykim", "caesarxuchao", "cici37", "dchen1107", "derekwaynecarr", "dims", "janetkuo", "jsafrane", "justinsb", "luxas", "mikedanese", "mwielgus"], "former_approvers": []}}], "lavalamp": {"areas": 31, "decisions": 39, "dark": 0, "thin": 0, "heirs": [{"heir": "deads2k", "score": 42.5, "already_approves_their_areas": 22, "shared_areas": ["kubernetes/kubernetes/cmd/kube-apiserver/OWNERS", "kubernetes/kubernetes/cmd/kube-controller-manager/OWNERS", "kubernetes/kubernetes/hack/OWNERS", "kubernetes/kubernetes/pkg/client/OWNERS", "kubernetes/kubernetes/pkg/controller/garbagecollector/OWNERS", "kubernetes/kubernetes/pkg/controlplane/OWNERS"], "shared_decisions": ["KEP-4020 Unknown Version Interoperability Proxy", "KEP-3716 Admission Webhook Match Conditions", "KEP-3488 CEL for Admission Control"]}, {"heir": "liggitt", "score": 34.5, "already_approves_their_areas": 20, "shared_areas": ["kubernetes/kubernetes/build/OWNERS", "kubernetes/kubernetes/cmd/OWNERS", "kubernetes/kubernetes/cmd/kube-apiserver/OWNERS", "kubernetes/kubernetes/cmd/kube-controller-manager/OWNERS", "kubernetes/kubernetes/hack/OWNERS", "kubernetes/kubernetes/pkg/OWNERS"], "shared_decisions": ["KEP-4020 Unknown Version Interoperability Proxy", "KEP-3488 CEL for Admission Control", "KEP-3037 Alternative Services"]}, {"heir": "sttts", "score": 28.0, "already_approves_their_areas": 18, "shared_areas": ["kubernetes/kubernetes/cmd/kube-apiserver/OWNERS", "kubernetes/kubernetes/cmd/kube-controller-manager/OWNERS", "kubernetes/kubernetes/hack/OWNERS", "kubernetes/kubernetes/pkg/client/OWNERS", "kubernetes/kubernetes/pkg/controller/garbagecollector/OWNERS", "kubernetes/kubernetes/pkg/controlplane/OWNERS"], "shared_decisions": ["KEP-3157 Allow informers for getting a stream of data instead of chunking", "KEP-2896 OpenAPI V3", "KEP-2887 OpenAPI Enum Types"]}, {"heir": "jpbetz", "score": 26.5, "already_approves_their_areas": 17, "shared_areas": ["kubernetes/kubernetes/cmd/kube-apiserver/OWNERS", "kubernetes/kubernetes/cmd/kube-controller-manager/OWNERS", "kubernetes/kubernetes/hack/OWNERS", "kubernetes/kubernetes/pkg/client/OWNERS", "kubernetes/kubernetes/pkg/controller/garbagecollector/OWNERS", "kubernetes/kubernetes/pkg/controlplane/OWNERS"], "shared_decisions": ["KEP-4020 Unknown Version Interoperability Proxy", "KEP-3716 Admission Webhook Match Conditions", "KEP-3488 CEL for Admission Control"]}, {"heir": "smarterclayton", "score": 26.0, "already_approves_their_areas": 17, "shared_areas": ["kubernetes/kubernetes/cmd/OWNERS", "kubernetes/kubernetes/cmd/kube-apiserver/OWNERS", "kubernetes/kubernetes/cmd/kube-controller-manager/OWNERS", "kubernetes/kubernetes/hack/OWNERS", "kubernetes/kubernetes/pkg/OWNERS", "kubernetes/kubernetes/pkg/client/OWNERS"], "shared_decisions": ["KEP-3352 Aggregated Discovery", "KEP-2527 Clarify if/how controllers can use status to track non-observable state", "KEP-2338 API gzip compression support"]}], "sample": ["build", "cmd", "cmd/kube-apiserver", "cmd/kube-controller-manager", "hack", "pkg", "pkg/client", "pkg/controller/garbagecollector", "pkg/controlplane", "pkg/kubeapiserver", "pkg/registry", "pkg/routes", "plugin", "staging/src/k8s.io/apiextensions-apiserver", "staging/src/k8s.io/apimachinery", "staging/src/k8s.io/apimachinery/pkg", "staging/src/k8s.io/apiserver", "staging/src/k8s.io/apiserver/pkg/storage", "staging/src/k8s.io/apiserver/pkg/util/flowcontrol", "staging/src/k8s.io/client-go", "staging/src/k8s.io/client-go/tools/cache", "staging/src/k8s.io/code-generator", "staging/src/k8s.io/code-generator/cmd/client-gen", "staging/src/k8s.io/component-base", "staging/src/k8s.io/controller-manager"]}, "whatif": [{"handle": "thockin", "status": "active", "view": "if they left today", "leaving_together": [], "areas": 137, "areas_with_no_local_approver": 1, "areas_down_to_one": 9, "dark_areas": [{"area": "pkg/proxy/apis/config", "owners_file": "kubernetes/kubernetes/pkg/proxy/apis/config/OWNERS", "remaining_local_approvers": [], "falls_back_to": {"owners_file": "kubernetes/kubernetes/pkg/proxy/OWNERS", "approvers": ["aojea", "bowei", "danwinship", "robscott"]}}], "thin_areas": [{"area": "pkg/apis/networking", "owners_file": "kubernetes/kubernetes/pkg/apis/networking/OWNERS", "remaining_local_approvers": ["smarterclayton"], "falls_back_to": null}, {"area": "pkg/registry/core/service", "owners_file": "kubernetes/kubernetes/pkg/registry/core/service/OWNERS", "remaining_local_approvers": ["aojea"], "falls_back_to": null}, {"area": "pkg/registry/networking", "owners_file": "kubernetes/kubernetes/pkg/registry/networking/OWNERS", "remaining_local_approvers": ["aojea"], "falls_back_to": null}, {"area": "pkg/volume/configmap", "owners_file": "kubernetes/kubernetes/pkg/volume/configmap/OWNERS", "remaining_local_approvers": ["saad-ali"], "falls_back_to": null}, {"area": "pkg/volume/downwardapi", "owners_file": "kubernetes/kubernetes/pkg/volume/downwardapi/OWNERS", "remaining_local_approvers": ["saad-ali"], "falls_back_to": null}, {"area": "pkg/volume/emptydir", "owners_file": "kubernetes/kubernetes/pkg/volume/emptydir/OWNERS", "remaining_local_approvers": ["saad-ali"], "falls_back_to": null}, {"area": "pkg/volume/git_repo", "owners_file": "kubernetes/kubernetes/pkg/volume/git_repo/OWNERS", "remaining_local_approvers": ["saad-ali"], "falls_back_to": null}, {"area": "pkg/volume/secret", "owners_file": "kubernetes/kubernetes/pkg/volume/secret/OWNERS", "remaining_local_approvers": ["saad-ali"], "falls_back_to": null}, {"area": "vendor/sigs.k8s.io/randfill", "owners_file": "kubernetes/kubernetes/vendor/sigs.k8s.io/randfill/OWNERS", "remaining_local_approvers": ["sig-testing-leads"], "falls_back_to": null}], "decisions": 107, "decisions_left_with_nobody_active": 12, "examples_of_those_decisions": [{"kep": "3726", "title": "standard-application-protocols", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/3726-standard-application-protocols/kep.yaml"}, {"kep": "2091", "title": "Add support for AdminNetworkPolicy resources", "status": "implementable", "source": "kubernetes/enhancements/keps/sig-network/2091-admin-network-policy/kep.yaml"}, {"kep": "3836", "title": "Kube-proxy improved ingress connectivity reliability", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/3836-kube-proxy-improved-ingress-connectivity-reliability/kep.yaml"}, {"kep": "2447", "title": "Make kube-proxy service abstraction optional", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/2447-Make-kube-proxy-service-abstraction-optional/kep.yaml"}, {"kep": "1734", "title": "Image Promoter", "status": "implementable", "source": "kubernetes/enhancements/keps/sig-release/1734-k8s-image-promoter/kep.yaml"}, {"kep": "2450", "title": "Remove knowledge of pod cluster CIDR from iptables rules", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/2450-Remove-knowledge-of-pod-cluster-CIDR-from-iptables-rules/kep.yaml"}, {"kep": "614", "title": "SCTP support", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/614-SCTP-support/kep.yaml"}, {"kep": "2943", "title": "Network Policy status subresource", "status": "withdrawn", "source": "kubernetes/enhancements/keps/sig-network/2943-networkpolicy-status/kep.yaml"}, {"kep": "2595", "title": "Expanded DNS Configuration", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/2595-expanded-dns-config/kep.yaml"}, {"kep": "2079", "title": "Allow a Network Policy to contemplate a set of ports in a single rule", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/2079-network-policy-port-range/kep.yaml"}, {"kep": "265", "title": "IPVS Load Balancing Mode in Kubernetes", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/265-ipvs-based-load-balancing/kep.yaml"}, {"kep": "3458", "title": "Remove transient node predicates from KCCM's service controller", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/3458-remove-transient-node-predicates-from-service-controller/kep.yaml"}], "leadership_seats": ["Network"], "policy": "Answers come from public project records and are attributed to the people in them. Inheritance never imitates a person or speaks in their voice.", "safe": 127}, {"handle": "thockin", "status": "active", "view": "if they left today", "leaving_together": ["deads2k", "liggitt"], "areas": 239, "areas_with_no_local_approver": 1, "areas_down_to_one": 35, "dark_areas": [{"area": "pkg/proxy/apis/config", "owners_file": "kubernetes/kubernetes/pkg/proxy/apis/config/OWNERS", "remaining_local_approvers": [], "falls_back_to": {"owners_file": "kubernetes/kubernetes/pkg/proxy/OWNERS", "approvers": ["aojea", "bowei", "danwinship", "robscott"]}}], "thin_areas": [{"area": "cmd/dependencycheck", "owners_file": "kubernetes/kubernetes/cmd/dependencycheck/OWNERS", "remaining_local_approvers": ["bentheelder"], "falls_back_to": null}, {"area": "cmd/importverifier", "owners_file": "kubernetes/kubernetes/cmd/importverifier/OWNERS", "remaining_local_approvers": ["sttts"], "falls_back_to": null}, {"area": "cmd/prune-junit-xml", "owners_file": "kubernetes/kubernetes/cmd/prune-junit-xml/OWNERS", "remaining_local_approvers": ["dims"], "falls_back_to": null}, {"area": "pkg/apis/networking", "owners_file": "kubernetes/kubernetes/pkg/apis/networking/OWNERS", "remaining_local_approvers": ["smarterclayton"], "falls_back_to": null}, {"area": "pkg/apis/storage", "owners_file": "kubernetes/kubernetes/pkg/apis/storage/OWNERS", "remaining_local_approvers": ["msau42"], "falls_back_to": null}, {"area": "pkg/auth", "owners_file": "kubernetes/kubernetes/pkg/auth/OWNERS", "remaining_local_approvers": ["smarterclayton"], "falls_back_to": null}, {"area": "pkg/kubeapiserver/authorizer", "owners_file": "kubernetes/kubernetes/pkg/kubeapiserver/authorizer/OWNERS", "remaining_local_approvers": ["mikedanese"], "falls_back_to": null}, {"area": "pkg/quota/v1", "owners_file": "kubernetes/kubernetes/pkg/quota/v1/OWNERS", "remaining_local_approvers": ["derekwaynecarr"], "falls_back_to": null}, {"area": "pkg/registry/authorization", "owners_file": "kubernetes/kubernetes/pkg/registry/authorization/OWNERS", "remaining_local_approvers": ["mikedanese"], "falls_back_to": null}, {"area": "pkg/registry/core/service", "owners_file": "kubernetes/kubernetes/pkg/registry/core/service/OWNERS", "remaining_local_approvers": ["aojea"], "falls_back_to": null}], "decisions": 241, "decisions_left_with_nobody_active": 28, "examples_of_those_decisions": [{"kep": "3726", "title": "standard-application-protocols", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/3726-standard-application-protocols/kep.yaml"}, {"kep": "2091", "title": "Add support for AdminNetworkPolicy resources", "status": "implementable", "source": "kubernetes/enhancements/keps/sig-network/2091-admin-network-policy/kep.yaml"}, {"kep": "2341", "title": "Enabling clients to tell if resource endpoints serve the same set of objects", "status": "provisional", "source": "kubernetes/enhancements/keps/sig-api-machinery/2341-enabling-clients-to-tell-if-resource-endpoints-serve-the-same-set-of-objects/kep.yaml"}, {"kep": "2527", "title": "Clarify if/how controllers can use status to track non-observable state", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-architecture/2527-clarify-status-observations-vs-rbac/kep.yaml"}, {"kep": "3836", "title": "Kube-proxy improved ingress connectivity reliability", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/3836-kube-proxy-improved-ingress-connectivity-reliability/kep.yaml"}, {"kep": "598", "title": "CustomResourceDefinition Conversion Webhook", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-api-machinery/598-crd-conversion-webhook/kep.yaml"}, {"kep": "3325", "title": "Review attibutes of a current user", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-auth/3325-self-subject-attributes-review-api/kep.yaml"}, {"kep": "2447", "title": "Make kube-proxy service abstraction optional", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-network/2447-Make-kube-proxy-service-abstraction-optional/kep.yaml"}, {"kep": "2799", "title": "Reduction of Secret-based Service Account Tokens", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-auth/2799-reduction-of-secret-based-service-account-token/kep.yaml"}, {"kep": "1043", "title": "Windows security context API changes", "status": "implemented", "source": "kubernetes/enhancements/keps/sig-windows/1043-windows-security-context/kep.yaml"}, {"kep": "2342", "title": "exposing hashed storage versions via the discovery API", "status": "provisional", "source": "kubernetes/enhancements/keps/sig-api-machinery/2342-exposing-hashed-storage-versions-via-the-discovery-API/kep.yaml"}, {"kep": "2330", "title": "Migrating API objects to latest storage version", "status": "implementable", "source": "kubernetes/enhancements/keps/sig-api-machinery/2330-migrating-api-objects-to-latest-storage-version/kep.yaml"}], "leadership_seats": ["Network", "Auth", "API Machinery"], "policy": "Answers come from public project records and are attributed to the people in them. Inheritance never imitates a person or speaks in their voice.", "safe": 203}], "spof": {"areas_with_one_active_approver": 45, "largest": [{"area": "staging/src/k8s.io/apiserver/pkg/endpoints", "only_approver": "apelisse", "sub_areas": 8, "owners_file": "kubernetes/kubernetes/staging/src/k8s.io/apiserver/pkg/endpoints/OWNERS"}, {"area": "staging/src/k8s.io/apimachinery/pkg/util", "only_approver": "apelisse", "sub_areas": 3, "owners_file": "kubernetes/kubernetes/staging/src/k8s.io/apimachinery/pkg/util/OWNERS"}, {"area": "pkg/controller/podautoscaler", "only_approver": "mwielgus", "sub_areas": 1, "owners_file": "kubernetes/kubernetes/pkg/controller/podautoscaler/OWNERS"}, {"area": "staging/src/k8s.io/apiserver/pkg/server/options", "only_approver": "enj", "sub_areas": 1, "owners_file": "kubernetes/kubernetes/staging/src/k8s.io/apiserver/pkg/server/options/OWNERS"}, {"area": "test/images/agnhost", "only_approver": "claudiubelu", "sub_areas": 1, "owners_file": "kubernetes/kubernetes/test/images/agnhost/OWNERS"}, {"area": "cluster/gce/manifests", "only_approver": "mrhohn", "sub_areas": 0, "owners_file": "kubernetes/kubernetes/cluster/gce/manifests/OWNERS"}]}, "orphans": {"implemented_decisions": 298, "with_nobody_active_left": 4, "examples": [{"kep": "117", "title": "Enhance HPA Metrics Specificity", "team": "Autoscaling", "people": ["maciekpytel", "directxman12", "brancz"], "source": "kubernetes/enhancements/keps/sig-autoscaling/117-hpa-metrics-specificity/kep.yaml"}, {"kep": "383", "title": "New Event API GA Graduation", "team": "Instrumentation", "people": ["gmarek", "chelseychen", "brancz"], "source": "kubernetes/enhancements/keps/sig-instrumentation/383-new-event-api-ga-graduation/kep.yaml"}, {"kep": "1206", "title": "Kubernetes Metrics Overhaul", "team": "Instrumentation", "people": ["piosz", "ehashman", "directxman12", "brancz"], "source": "kubernetes/enhancements/keps/sig-instrumentation/1206-metrics-overhaul/kep.yaml"}, {"kep": "2383", "title": "Extend Kustomize Patches to Multiple Targets", "team": "CLI", "people": ["monopole", "liujingfang1"], "source": "kubernetes/enhancements/keps/sig-cli/2383-extend-kustomize-patches-to-multiple-targets/kep.yaml"}], "note": "'Active' = currently listed as an approver, reviewer or lead. People who only appear on KEPs count as not active."}, "shadow": {"communities": 10, "cross_team_groups": [{"size": 48, "official_teams_spanned": 8, "teams": [["Node", 20], ["API Machinery", 4], ["Architecture", 4], ["Cluster Lifecycle", 3], ["Network", 2]], "members": ["adrianreber", "andrewsykim", "anfernee", "bart0sh", "bentheelder", "cblecker", "daschott", "dchen1107", "derekwaynecarr", "dims", "endocrimes", "fabriziopandini", "feiskyer", "harshanarayana"]}, {"size": 44, "official_teams_spanned": 6, "teams": [["API Machinery", 28], ["Auth", 2], ["Testing", 2], ["Release", 1], ["Apps", 1]], "members": ["aaron-prindle", "ahmedtd", "alexzielenski", "andreyvelich", "aramase", "benluddy", "caesarxuchao", "cheftako", "cici37", "cjcullen", "gautierdelorme", "helayoty", "hzxuzhonghu", "ingvagabund"]}, {"size": 27, "official_teams_spanned": 5, "teams": [["Network", 7], ["API Machinery", 4], ["Architecture", 2], ["Cloud Provider", 2], ["Apps", 1]], "members": ["aojea", "aroradaman", "bowei", "bridgetkromhout", "caseydavenport", "damiansawicki", "danwinship", "dipesh-rawat", "divya-mohan0209", "freehan", "joaquimrocha", "lmktfy", "mikezappa87", "mrhohn"]}, {"size": 18, "official_teams_spanned": 5, "teams": [["Node", 8], ["Testing", 6], ["Cloud Provider", 1], ["Architecture", 1], ["API Machinery", 1]], "members": ["aravindhp", "bobbypage", "claudiubelu", "ffromani", "harche", "hirazawaui", "jsturtevant", "kannon92", "marosset", "matthyx", "mikebrow", "mkumatag", "ravisantoshgudimetla", "rphillips"]}, {"size": 22, "official_teams_spanned": 4, "teams": [["API Machinery", 10], ["Architecture", 7], ["Instrumentation", 1], ["Testing", 1]], "members": ["ahrtr", "coffeepac", "dashpole", "dgrisonnet", "elbehery", "fuweid", "jmhbnz", "mengjiao-liu", "monotek", "nmn3m", "pav-kv", "pohly", "ptabor", "rainbowmango"]}, {"size": 18, "official_teams_spanned": 4, "teams": [["Scheduling", 7], ["Storage", 6], ["Testing", 3], ["API Machinery", 1]], "members": ["andyzhangx", "carlory", "cofyc", "divyenpatel", "gnufied", "humblec", "jingxu97", "jsafrane", "mattcary", "mauriciopoppe", "msau42", "rata", "saad-ali", "saikat-royc"]}], "method": "algo.labelPropagation over each active person's 3 strongest WORKED_WITH links; each member's official team = the team owning most of the code they approve or review"}, "keystones": [{"handle": "deads2k", "betweenness": 83926.7}, {"handle": "liggitt", "betweenness": 66429.6}, {"handle": "thockin", "betweenness": 58705.1}, {"handle": "sttts", "betweenness": 47284.3}, {"handle": "dims", "betweenness": 42841.3}, {"handle": "soltysh", "betweenness": 37322.3}], "why": [{"kep": "4438", "title": "Restarting sidecar containers during Pod termination", "status": "implementable", "stage": "alpha", "latest_milestone": "v1.38", "created": "2024-01-25", "team": "Node", "authors": ["matthyx", "sergeykanzhelev"], "approvers": ["mrunalp", "thockin"], "replaces": [], "can_still_explain": ["matthyx", "mrunalp", "sergeykanzhelev", "thockin"], "source": "kubernetes/enhancements/keps/sig-node/4438-container-restart-termination/kep.yaml"}, {"kep": "753", "title": "Sidecar Containers", "status": "implemented", "stage": "stable", "latest_milestone": "v1.33", "created": "2018-05-14", "team": "Node", "authors": ["gjkim42", "jpbetz", "matthyx", "sergeykanzhelev"], "approvers": ["mrunalp", "thockin"], "replaces": [], "can_still_explain": ["jpbetz", "matthyx", "mrunalp", "sergeykanzhelev", "thockin"], "source": "kubernetes/enhancements/keps/sig-node/753-sidecar-containers/kep.yaml"}], "handoff": {"heirs": ["deads2k", "liggitt", "sttts"], "areas": [{"area": "pkg/registry", "held_by": ["deads2k", "liggitt"]}, {"area": "pkg/controlplane", "held_by": ["deads2k", "sttts"]}, {"area": "pkg/kubeapiserver", "held_by": ["deads2k", "liggitt", "sttts"]}, {"area": "staging/src/k8s.io/apimachinery", "held_by": ["deads2k", "liggitt", "sttts"]}, {"area": "staging/src/k8s.io/apiserver", "held_by": ["deads2k", "liggitt", "sttts"]}, {"area": "staging/src/k8s.io/client-go", "held_by": ["deads2k", "liggitt", "sttts"]}]}};
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, parent, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+const short = p => p.replace('staging/src/k8s.io/', 'k8s.io/');
+
+// facts
+const P = D.proof.integrity;
+$('facts').innerHTML = [[fmt(D.status.active + D.status.emeritus + D.status.unlisted), 'people'], [fmt(P.nodes.Dir), 'code areas'], [fmt(D.keps), 'design decisions'], [fmt(D.status.emeritus), 'real departures']]
+  .map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+
+// hero handoff
+(function () {
+  const svg = $('hand'), H = D.handoff, areas = H.areas;
+  const ay = i => 40 + i * 56, ax = 345;
+  const hy = i => 90 + i * 90;
+  const edgesThen = [], edgesNow = [];
+  areas.forEach((a, i) => {
+    edgesThen.push(el('path', { d: `M110 180 C 220 180, 240 ${ay(i)}, ${ax - 6} ${ay(i)}`, fill: 'none', stroke: 'var(--ink-3)', 'stroke-width': 2, class: 'edge' }, svg));
+  });
+  areas.forEach((a, i) => a.held_by.forEach(h => {
+    const j = H.heirs.indexOf(h);
+    edgesNow.push(el('path', { d: `M${ax + 182} ${ay(i)} C ${ax + 200} ${ay(i)}, ${ax + 200} ${ay(i)}, ${ax + 182} ${ay(i)}`, fill: 'none' }, null));
+    edgesNow.push(el('path', { d: `M128 ${hy(j)} C 230 ${hy(j)}, 240 ${ay(i)}, ${ax - 6} ${ay(i)}`, fill: 'none', stroke: 'var(--accent)', 'stroke-width': 1.6, class: 'edge', opacity: 0.85 }, svg));
+  }));
+  areas.forEach((a, i) => {
+    const g = el('g', {}, svg);
+    el('rect', { x: ax, y: ay(i) - 17, width: 205, height: 34, rx: 8, fill: 'var(--surface-2)' }, g);
+    el('text', { x: ax + 12, y: ay(i) + 4, fill: 'var(--ink)', 'font-size': 12.5 }, g, short(a.area));
+  });
+  const lav = el('g', { class: 'fade' }, svg);
+  el('circle', { cx: 74, cy: 180, r: 36, fill: 'var(--surface-2)', stroke: 'var(--ink-2)', 'stroke-width': 2 }, lav);
+  el('text', { x: 74, y: 184, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-size': 12 }, lav, 'lavalamp');
+  const lavTag = el('text', { x: 74, y: 236, 'text-anchor': 'middle', fill: 'var(--ink-3)', 'font-size': 11 }, lav, 'emeritus');
+  const heirs = el('g', { class: 'fade' }, svg);
+  H.heirs.forEach((h, j) => {
+    el('circle', { cx: 92, cy: hy(j), r: 34, fill: 'var(--surface-2)', stroke: 'var(--accent)', 'stroke-width': 2 }, heirs);
+    el('text', { x: 92, y: hy(j) + 4, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-size': 12 }, heirs, h);
+  });
+  function set(now) {
+    $('h-now').setAttribute('aria-pressed', now); $('h-then').setAttribute('aria-pressed', !now);
+    edgesThen.forEach(e => e.style.opacity = now ? 0 : 1);
+    edgesNow.forEach(e => e.style.opacity = now ? 0.85 : 0);
+    lav.style.opacity = now ? 0 : 1; heirs.style.opacity = now ? 1 : 0;
+    $('hand-cap').textContent = now
+      ? `Today deads2k, liggitt and sttts approve every one of these areas. Across all ${D.lavalamp.areas} of lavalamp's former areas, none was left without an approver.`
+      : `lavalamp was an approver on all six of these areas, and on ${D.lavalamp.areas - 6} more. Their name now sits on the emeritus list in each OWNERS file.`;
+  }
+  $('h-then').onclick = () => set(false); $('h-now').onclick = () => set(true);
+  set(true);
+})();
+
+// pipeline
+const R = D.proof.receipts;
+$('pipe').innerHTML = [
+  ['Public records', 'Three Kubernetes repositories, pinned to exact commits.', [`${fmt(P.owners_files_on_disk)} OWNERS files`, 'sigs.yaml: teams and leads', `${fmt(D.keps)} design decisions (KEPs)`]],
+  ['Loader', 'Parses the files into people, folders, teams and decisions. Handles only, no personal data.', ['expands aliases', 'links each folder to its parent', 'scores who worked with whom']],
+  ['FalkorDB graph', 'Holds every relationship. Answers by traversal and graph algorithms.', [`${fmt(Object.values(P.nodes).reduce((a, b) => a + b, 0))} nodes`, `${fmt(Object.values(P.edges).reduce((a, b) => a + b, 0))} edges`, 'label propagation, betweenness, full-text']],
+  ['12 fixed tools', 'Written Cypher, never generated. Every name is checked against the graph.', ['who_approves · departure_impact', 'heirs · why · shadow_teams', 'keystone_people · memory']],
+  ['Claude agent', 'Chooses tools, reads results, writes the answer with sources.', ['answer cites OWNERS files and KEPs', 'graph receipt on every answer', 'grounding check flags guesses']],
+].map(([h, p, li], i) => `<div class="step${i === 2 ? ' graph' : ''}"><span class="n">${i + 1} / 5</span><h3>${h}</h3><p>${p}</p><ul>${li.map(x => `<li>${x}</li>`).join('')}</ul></div>`).join('');
+
+// schema
+(function () {
+  const s = $('schema'), E = P.edges, N = P.nodes;
+  const pos = { Dir: [150, 160], Person: [450, 160], KEP: [750, 160], Subproject: [150, 390], Team: [450, 390] };
+  const label = { Dir: 'Code area', Person: 'Person', KEP: 'Decision', Subproject: 'Subproject', Team: 'Team' };
+  const line = (a, b, lines, dx = 0, dy = -10) => {
+    const [x1, y1] = pos[a], [x2, y2] = pos[b];
+    el('line', { x1, y1, x2, y2, stroke: 'var(--line)', 'stroke-width': 2 }, s);
+    const mx = (x1 + x2) / 2 + dx, my = (y1 + y2) / 2 + dy;
+    lines.forEach((t, i) => el('text', { x: mx, y: my - (lines.length - 1 - i) * 17, 'text-anchor': 'middle', fill: 'var(--ink-2)', 'font-size': 12.5 }, s, t));
+  };
+  const loop = (n, t) => {
+    const [x, y] = pos[n];
+    el('path', { d: `M${x - 26} ${y - 52} C ${x - 40} ${y - 120}, ${x + 40} ${y - 120}, ${x + 26} ${y - 52}`, fill: 'none', stroke: 'var(--line)', 'stroke-width': 2 }, s);
+    el('text', { x, y: y - 112, 'text-anchor': 'middle', fill: 'var(--ink-2)', 'font-size': 12.5 }, s, t);
+  };
+  line('Dir', 'Person', [`APPROVES ${fmt(E.APPROVES)}`, `REVIEWS ${fmt(E.REVIEWS)}`, `EMERITUS_OF ${fmt(E.EMERITUS_OF)}`]);
+  line('Person', 'KEP', [`AUTHORED ${fmt(E.AUTHORED)}`, `APPROVED ${fmt(E.APPROVED)}`, `REVIEWED ${fmt(E.REVIEWED)}`]);
+  line('Person', 'Team', [`LEADS ${fmt(E.LEADS)}`, `LED ${fmt(E.LED)}`], 62, 8);
+  line('Subproject', 'Team', [`PART_OF ${fmt(E.PART_OF)}`]);
+  line('Subproject', 'Dir', [`OWNS ${fmt(E.OWNS)}`], -44, 8);
+  line('KEP', 'Team', [`OWNED_BY ${fmt(E.OWNED_BY)}`, `INVOLVES ${fmt(E.INVOLVES)}`], 70, 26);
+  loop('Dir', `CHILD_OF ${fmt(E.CHILD_OF)}`); loop('Person', `WORKED_WITH ${fmt(E.WORKED_WITH)}`); loop('KEP', `REPLACES ${fmt(E.REPLACES)}`);
+  for (const n in pos) {
+    const [x, y] = pos[n], hot = n === 'Person';
+    el('rect', { x: x - 72, y: y - 46, width: 144, height: 92, rx: 46, fill: hot ? 'var(--accent)' : 'var(--surface-2)' }, s);
+    el('text', { x, y: y - 4, 'text-anchor': 'middle', fill: hot ? 'var(--accent-ink)' : 'var(--ink)', 'font-size': 15, 'font-weight': 500, style: 'font-family:var(--display)' }, s, label[n]);
+    el('text', { x, y: y + 18, 'text-anchor': 'middle', fill: hot ? 'var(--accent-ink)' : 'var(--ink-2)', 'font-size': 12.5 }, s, `${fmt(N[n])} · :${n}`);
+  }
+})();
+
+// climbs
+$('climbs').innerHTML = D.who.map((w, k) => {
+  const known = Object.fromEntries(w.steps.map(s => [s.path, s]));
+  const top = w.steps[w.steps.length - 1].path;
+  const dirs = []; let d = w.file.split('/').slice(0, -1).join('/');
+  while (true) { dirs.push(d); if (d === top || !d.includes('/')) break; d = d.split('/').slice(0, -1).join('/'); }
+  const rows = [`<div class="rung file"><div class="rail"><span class="dot"></span><span class="bar"></span></div><div class="body"><span class="path">${esc(w.file)}</span><span class="muted" style="font-size:.85rem">the file you changed</span></div></div>`];
+  dirs.forEach((p, i) => {
+    const s = known[p], last = i === dirs.length - 1;
+    let cls = '', note;
+    if (!s) note = '<span class="chip">no OWNERS file · keep climbing</span>';
+    else if (!s.approvers) { cls = 'skip'; note = '<span class="chip warn">OWNERS names no approvers · follow CHILD_OF</span>'; }
+    else {
+      cls = 'hit';
+      note = `<span class="chip good">OWNERS · ${s.approvers} approvers</span><div class="people">${w.answer.approvers.map(h => `<span class="chip">${h}</span>`).join('')}</div>`
+        + (s.former.length ? `<span class="muted" style="font-size:.85rem">former approvers: <span class="mono">${s.former.join(', ')}</span></span>` : '');
+    }
+    rows.push(`<div class="rung ${cls}"><div class="rail"><span class="dot"></span>${last ? '' : '<span class="bar"></span>'}</div><div class="body"><span class="path">${esc(p)}/</span>${note}</div></div>`);
+  });
+  const title = k === 0 ? 'Kubelet container runtime' : 'Core API validation';
+  return `<div class="card" style="display:flex;flex-direction:column;gap:16px"><div><h3>${title}</h3><p class="muted" style="font-size:.9rem">climbs ${dirs.length - 1} folder${dirs.length === 2 ? '' : 's'} to the answer</p></div><div class="climb">${rows.join('')}</div><p class="src">who_approves() · cites ${esc(w.answer.owners_file)}</p></div>`;
+}).join('');
+
+// lavalamp
+const L = D.lavalamp;
+$('lav-lede').textContent = `lavalamp is listed as a former approver on ${L.areas} code areas and appears on ${L.decisions} design decisions. Every one of those areas still has at least two active approvers, and every decision still has someone active who wrote or approved it.`;
+$('lav-tiles').innerHTML = [[L.areas, 'former code areas', ''], [L.decisions, 'design decisions', ''], [L.dark, 'areas left without an approver', 'good'], [L.thin, 'areas down to one person', 'good']]
+  .map(([b, s, c]) => `<div class="tile ${c}"><b>${b}</b><span>${s}</span></div>`).join('');
+$('heirs').innerHTML = L.heirs.map(h => `<div class="brow" data-tip="${esc(h.heir)}: approves ${h.already_approves_their_areas} of ${L.areas} areas&#10;shared: ${esc(h.shared_decisions.join(' · '))}"><span class="who">${h.heir}</span><span class="track"><span class="fill" style="width:${h.already_approves_their_areas / L.areas * 100}%"></span></span><span class="val">${h.already_approves_their_areas} of ${L.areas}</span></div>`).join('');
+
+// what if
+function whatif(k) {
+  const w = D.whatif[k];
+  $('wi-0').setAttribute('aria-pressed', k === 0); $('wi-1').setAttribute('aria-pressed', k === 1);
+  $('wi-title').textContent = k === 0 ? 'If thockin left tomorrow' : 'If thockin, liggitt and deads2k left together';
+  $('wi-areas-h').textContent = `${fmt(w.areas)} code areas they approve`;
+  $('wi-dec-h').textContent = `${fmt(w.decisions)} design decisions they wrote or approved`;
+  $('wi-dark').textContent = w.areas_with_no_local_approver; $('wi-thin').textContent = w.areas_down_to_one; $('wi-safe').textContent = w.safe;
+  $('wi-orph').textContent = w.decisions_left_with_nobody_active;
+  const dk = w.dark_areas.map(a => a.area), th = w.thin_areas.map(a => [a.area, a.remaining_local_approvers[0]]);
+  let html = '';
+  for (let i = 0; i < w.areas_with_no_local_approver; i++) html += `<i class="dark" data-tip="${esc(dk[i] || 'area')}: no local approver left"></i>`;
+  for (let i = 0; i < w.areas_down_to_one; i++) html += `<i class="thin" data-tip="${th[i] ? esc(th[i][0]) + ': only ' + esc(th[i][1]) + ' left' : 'down to one approver'}"></i>`;
+  for (let i = 0; i < w.safe; i++) html += '<i></i>';
+  $('wi-areas').innerHTML = html;
+  const ex = w.examples_of_those_decisions; html = '';
+  for (let i = 0; i < w.decisions; i++) html += i < w.decisions_left_with_nobody_active ? `<i class="orph" data-tip="${ex[i] ? 'KEP-' + ex[i].kep + ' ' + esc(ex[i].title) : 'orphaned decision'}"></i>` : '<i class="kept"></i>';
+  $('wi-dec').innerHTML = html;
+  $('wi-orph-list').innerHTML = ex.slice(0, 5).map(e => `<li><span>KEP-${e.kep} · ${esc(e.title)}</span><span class="src">${esc(e.status)} · ${esc(e.source)}</span></li>`).join('') + (w.decisions_left_with_nobody_active > 5 ? `<li class="muted">and ${w.decisions_left_with_nobody_active - 5} more</li>` : '');
+  $('wi-seats').innerHTML = w.leadership_seats.map(s => `<span class="chip warn">${esc(s)} lead</span>`).join('');
+  $('wi-fall').innerHTML = w.dark_areas.slice(0, 2).map(a => `<p class="mono" style="font-size:.88rem">${esc(a.area)}/ → ${esc(a.falls_back_to.owners_file.replace('kubernetes/kubernetes/', ''))}</p><p class="muted" style="font-size:.86rem">Approvals move up to ${a.falls_back_to.approvers.join(', ')}, who may not know this code.</p>`).join('');
+}
+$('wi-0').onclick = () => whatif(0); $('wi-1').onclick = () => whatif(1); whatif(0);
+
+// health
+$('shadow').innerHTML = D.shadow.cross_team_groups.slice(0, 4).map(g => `<div class="group"><div class="top"><b>${g.size} people</b><span class="chip warn">spans ${g.official_teams_spanned} official teams</span></div><div class="people">${g.teams.map(([t, n]) => `<span class="chip">${esc(t)} ${n}</span>`).join('')}</div><span class="src">${g.members.slice(0, 8).join(' · ')} …</span></div>`).join('');
+const kmax = D.keystones[0].betweenness;
+$('keys').innerHTML = D.keystones.map(k => `<div class="brow" data-tip="${k.handle}: betweenness ${fmt(Math.round(k.betweenness))}"><span class="who">${k.handle}</span><span class="track"><span class="fill" style="width:${k.betweenness / kmax * 100}%"></span></span><span class="val">${fmt(Math.round(k.betweenness / 1000))}k</span></div>`).join('');
+$('health-tiles').innerHTML = `<div class="tile warn"><b>${D.spof.areas_with_one_active_approver}</b><span>code areas with a single active approver</span></div><div class="tile bad"><b>${D.orphans.with_nobody_active_left}<span style="font-size:1rem;color:var(--ink-3)"> of ${D.orphans.implemented_decisions}</span></b><span>shipped decisions nobody active can explain</span></div>`;
+
+// proof
+const C = D.proof.correctness, A = D.proof.ablation, G = D.proof.grounding;
+const rels = Object.keys(A.without), mattered = rels.filter(r => A.without[r].length).length;
+const flagged = [...G.f.people.not_from_graph, ...G.f.keps.not_from_graph, ...G.f.paths.not_from_graph];
+$('proof-tiles').innerHTML = [
+  [`${fmt(C.agree)}<span style="font-size:1rem;color:var(--ink-3)"> / ${fmt(C.files)}</span>`, 'files where the graph matches an independent walk of the raw OWNERS files', 'good'],
+  [`${fmt(P.nodes.Dir)} = ${fmt(P.owners_files_on_disk)}`, 'folder nodes vs OWNERS files on disk', 'good'],
+  [`${mattered} of ${rels.length}`, 'relationship types change an answer when removed', ''],
+  [`${flagged.length} of ${flagged.length}`, 'invented names caught by the grounding check', 'good'],
+].map(([b, s, c]) => `<div class="tile ${c}"><b>${b}</b><span>${s}</span></div>`).join('');
+
+(function () {
+  const svg = $('hist'), h = C.hops, keys = Object.keys(h).map(Number).sort((a, b) => a - b);
+  const max = Math.max(...Object.values(h)), W = 900, top = 24, base = 210, left = 56, bw = (W - left - 10) / keys.length;
+  const nice = 10000, ticks = [0, 2500, 5000, 7500, nice].filter(t => t <= Math.max(max, nice));
+  const y = v => base - v / nice * (base - top);
+  ticks.forEach(t => { el('line', { x1: left, x2: W - 10, y1: y(t), y2: y(t), stroke: 'var(--line)', 'stroke-width': 1 }, svg); el('text', { x: left - 8, y: y(t) + 4, 'text-anchor': 'end', fill: 'var(--ink-3)', 'font-size': 11 }, svg, t ? fmt(t) : '0'); });
+  keys.forEach((k, i) => {
+    const v = h[k], x = left + i * bw + 6, w = bw - 12, yy = y(v);
+    const g = el('g', { 'data-tip': `${k} folder${k === 1 ? '' : 's'} up: ${fmt(v)} files` }, svg);
+    el('rect', { x: x - 4, y: top, width: w + 8, height: base - top, fill: 'transparent' }, g);
+    el('path', { d: `M${x} ${base} V${yy + 4} Q${x} ${yy} ${x + 4} ${yy} H${x + w - 4} Q${x + w} ${yy} ${x + w} ${yy + 4} V${base} Z`, fill: k === 0 ? 'var(--ink-3)' : 'var(--accent)' }, g);
+    el('text', { x: x + w / 2, y: base + 20, 'text-anchor': 'middle', fill: 'var(--ink-2)', 'font-size': 12 }, svg, k);
+  });
+  el('text', { x: left + (W - left) / 2, y: 252, 'text-anchor': 'middle', fill: 'var(--ink-3)', 'font-size': 11.5 }, svg, 'folders climbed from the file to its approvers');
+  $('hist-sub').textContent = `${fmt(C.files)} files. ${C.need_climb_pct}% are governed by an OWNERS file in a folder above them, up to ${keys[keys.length - 1]} levels. For ${fmt(C.via_child_of)} files the nearest OWNERS file names no approvers, so the answer exists only by walking CHILD_OF edges.`;
+})();
+
+$('matrix').innerHTML = `<table><thead><tr><th></th>${rels.map(r => `<th scope="col">${r}</th>`).join('')}</tr></thead><tbody>${A.questions.map(q => `<tr><th class="q" scope="row">${esc(q)}</th>${rels.map(r => A.without[r].includes(q) ? `<td class="hit" data-tip="without ${r}: '${esc(q)}' changes">●</td>` : '<td></td>').join('')}</tr>`).join('')}</tbody></table>`;
+
+function mark(text, g) {
+  const ok = [...g.people.grounded, ...g.paths.grounded], no = [...g.people.not_from_graph, ...g.paths.not_from_graph];
+  let out = esc(text);
+  const sub = (word, cls) => { out = out.replace(new RegExp(`(?<![\\w/-])(${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(?![\\w-])`, 'g'), `<mark class="${cls}">$1</mark>`); };
+  ok.forEach(w => sub(w, 'ok')); no.forEach(w => sub(w, 'no'));
+  g.keps.grounded.forEach(n => sub(`KEP-${n}`, 'ok')); g.keps.not_from_graph.forEach(n => sub(`KEP-${n}`, 'no'));
+  return out;
+}
+$('g-true').innerHTML = mark('lavalamp is emeritus on pkg/registry; deads2k and liggitt carry it. lavalamp authored KEP-4020.', G.t);
+$('g-false').innerHTML = mark('lavalamp handed pkg/scheduler to bgrant0607 after KEP-9999.', G.f);
+$('g-ok').textContent = `${G.t.score} from the graph`;
+$('g-bad').textContent = `${flagged.length} flagged`;
+$('rc').innerHTML = `<thead><tr><th>Tool</th><th class="r">Queries</th><th class="r">ms</th><th>What ran</th></tr></thead><tbody>${R.map(r => `<tr><td class="mono">${r.tool}${r.args.also_leaving ? ' (group)' : ''}</td><td class="r">${fmt(r.queries)}</td><td class="r">${fmt(Math.round(r.ms))}</td><td class="muted" style="font-size:.84rem">${Object.entries(r.by_kind).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(' · ')}</td></tr>`).join('')}</tbody>`;
+
+// tooltips
+const tip = $('tip');
+document.addEventListener('pointermove', e => {
+  const t = e.target.closest('[data-tip]');
+  if (!t) { tip.hidden = true; return; }
+  tip.textContent = t.getAttribute('data-tip'); tip.hidden = false;
+  const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8), y = Math.min(e.clientY + 14, innerHeight - tip.offsetHeight - 8);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+});
+</script>
