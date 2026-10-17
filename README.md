@@ -103,6 +103,7 @@ drafted, who a question went to, and what has changed since.
 
 | Check | Result |
 |---|---|
+| **With vs without FalkorDB**: the same 3 questions to the same model, with the graph tools and with none (`scripts/compare_graph.py`) | **19/19 expected facts with FalkorDB, 0/19 without.** 21 sources cited vs 2; all 63 names in the graph-backed answers came from the graph |
 | **Keeping current**: load as of Aug 20, replay every ownership PR since, compare with a fresh load | **18 PRs, graph identical** on all five checks |
 | **Integrity**: one `Dir` node per OWNERS file on disk, every edge type present | 586 = 586 |
 | **Correctness**: for every file in kubernetes/kubernetes, the graph's "who approves this?" matches an independent walk over the raw OWNERS files | **31,441 of 31,441 files (100%)** |
