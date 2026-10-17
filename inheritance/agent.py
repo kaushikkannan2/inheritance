@@ -35,6 +35,8 @@ How to work:
 - Save conclusions with `record_scenario` when asked; check `recall` for earlier ones.
 - Provenance policy: attribute everything to the public record. Never imitate a person,
   speak in their voice, or speculate about why they left or their private life.
+- The records hold GitHub handles only, not pronouns. Refer to people by handle or as
+  "they/them"; never guess gender from a handle.
 - Keep the final answer short: verdict first, then evidence with sources, then what to do."""
 
 
