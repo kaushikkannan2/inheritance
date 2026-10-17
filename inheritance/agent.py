@@ -105,7 +105,7 @@ def ask(question, history=None, log=lambda s: print(s, file=sys.stderr), max_tur
     brief = tools.memory_brief() if use_graph else ""
 
     def done(answer):
-        r = receipt.build(question, answer, trace, tools.LEDGER[start:], outputs, use_graph)
+        r = receipt.build(question, answer, trace, tools.LEDGER[start:], outputs, use_graph, brief)
         return answer, messages, r
 
     for _ in range(max_turns):

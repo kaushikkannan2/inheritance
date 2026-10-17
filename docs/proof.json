@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-17T14:37:11",
+  "at": "2026-10-17T21:50:39",
   "incremental": {
     "prs": [
       {
@@ -190,7 +190,7 @@
     "need_climb": 28108,
     "need_climb_pct": 89.4,
     "via_child_of": 1829,
-    "seconds": 171.3
+    "seconds": 76.4
   },
   "ablation": {
     "baseline": {
@@ -250,7 +250,8 @@
         "changed": [
           "who approves core API validation",
           "if thockin left",
-          "single points of failure"
+          "single points of failure",
+          "shadow teams"
         ],
         "answers": {
           "who approves kubelet code": [
@@ -296,7 +297,7 @@
           "orphaned decisions": 4,
           "shadow teams": [
             10,
-            48
+            44
           ],
           "keystones": [
             "deads2k",
@@ -724,20 +725,24 @@
           "lavalamp",
           "liggitt"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
       "keps": {
         "grounded": [
           "4020"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
       "paths": {
         "grounded": [
           "pkg/registry"
         ],
+        "from_graph_memory": [],
         "not_from_graph": []
       },
+      "recalled": 0,
       "score": "5/5",
       "all_grounded": true
     },
@@ -746,22 +751,26 @@
         "grounded": [
           "lavalamp"
         ],
+        "from_graph_memory": [],
         "not_from_graph": [
           "bgrant0607"
         ]
       },
       "keps": {
         "grounded": [],
+        "from_graph_memory": [],
         "not_from_graph": [
           "9999"
         ]
       },
       "paths": {
         "grounded": [],
+        "from_graph_memory": [],
         "not_from_graph": [
           "pkg/scheduler"
         ]
       },
+      "recalled": 0,
       "score": "1/4",
       "all_grounded": false
     },
@@ -779,7 +788,7 @@
         "traversal": 1
       },
       "rows": 48,
-      "ms": 14.0
+      "ms": 12.6
     },
     {
       "tool": "departure_impact",
@@ -792,7 +801,7 @@
         "traversal": 2
       },
       "rows": 406,
-      "ms": 45.5
+      "ms": 50.7
     },
     {
       "tool": "departure_impact",
@@ -809,7 +818,7 @@
         "traversal": 2
       },
       "rows": 748,
-      "ms": 111.2
+      "ms": 69.4
     },
     {
       "tool": "heirs",
@@ -821,7 +830,7 @@
         "match": 17
       },
       "rows": 56,
-      "ms": 77.4
+      "ms": 49.9
     },
     {
       "tool": "why",
@@ -834,7 +843,7 @@
         "match": 8
       },
       "rows": 16,
-      "ms": 46.0
+      "ms": 25.0
     },
     {
       "tool": "single_points_of_failure",
@@ -845,7 +854,7 @@
         "match": 1
       },
       "rows": 16,
-      "ms": 14.6
+      "ms": 10.3
     },
     {
       "tool": "orphaned_knowledge",
@@ -855,7 +864,7 @@
         "match": 3
       },
       "rows": 6,
-      "ms": 18.4
+      "ms": 16.2
     },
     {
       "tool": "shadow_teams",
@@ -868,7 +877,7 @@
         "traversal": 586
       },
       "rows": 9494,
-      "ms": 3441.7
+      "ms": 1555.6
     },
     {
       "tool": "keystone_people",
@@ -879,7 +888,7 @@
         "algorithm": 1
       },
       "rows": 10,
-      "ms": 219.5
+      "ms": 486.2
     }
   ]
 }
