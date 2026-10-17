@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-17T21:18:34",
+  "at": "2026-10-17T14:37:11",
   "incremental": {
     "prs": [
       {
@@ -190,7 +190,7 @@
     "need_climb": 28108,
     "need_climb_pct": 89.4,
     "via_child_of": 1829,
-    "seconds": 76.9
+    "seconds": 171.3
   },
   "ablation": {
     "baseline": {
@@ -250,8 +250,7 @@
         "changed": [
           "who approves core API validation",
           "if thockin left",
-          "single points of failure",
-          "shadow teams"
+          "single points of failure"
         ],
         "answers": {
           "who approves kubelet code": [
@@ -297,7 +296,7 @@
           "orphaned decisions": 4,
           "shadow teams": [
             10,
-            44
+            48
           ],
           "keystones": [
             "deads2k",
@@ -780,7 +779,7 @@
         "traversal": 1
       },
       "rows": 48,
-      "ms": 12.8
+      "ms": 14.0
     },
     {
       "tool": "departure_impact",
@@ -793,7 +792,7 @@
         "traversal": 2
       },
       "rows": 406,
-      "ms": 45.7
+      "ms": 45.5
     },
     {
       "tool": "departure_impact",
@@ -810,7 +809,7 @@
         "traversal": 2
       },
       "rows": 748,
-      "ms": 65.2
+      "ms": 111.2
     },
     {
       "tool": "heirs",
@@ -822,7 +821,7 @@
         "match": 17
       },
       "rows": 56,
-      "ms": 47.5
+      "ms": 77.4
     },
     {
       "tool": "why",
@@ -835,7 +834,7 @@
         "match": 8
       },
       "rows": 16,
-      "ms": 21.4
+      "ms": 46.0
     },
     {
       "tool": "single_points_of_failure",
@@ -846,7 +845,7 @@
         "match": 1
       },
       "rows": 16,
-      "ms": 9.5
+      "ms": 14.6
     },
     {
       "tool": "orphaned_knowledge",
@@ -856,7 +855,7 @@
         "match": 3
       },
       "rows": 6,
-      "ms": 16.2
+      "ms": 18.4
     },
     {
       "tool": "shadow_teams",
@@ -869,7 +868,7 @@
         "traversal": 586
       },
       "rows": 9494,
-      "ms": 1580.5
+      "ms": 3441.7
     },
     {
       "tool": "keystone_people",
@@ -880,7 +879,7 @@
         "algorithm": 1
       },
       "rows": 10,
-      "ms": 399.7
+      "ms": 219.5
     }
   ]
 }
