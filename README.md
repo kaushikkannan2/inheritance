@@ -43,7 +43,7 @@ each relationship type in turn and shows the answers change.
 |---|---|
 | People in the records | 850: 263 active, 137 emeritus, 450 seen only on design decisions |
 | Code areas with their own OWNERS file | 586, of which 149 list a former approver |
-| Design decisions | 683 KEPs, 675 with their design document loaded |
+| Design decisions | 683 KEP files (679 distinct decisions), 675 with their design document loaded |
 | **A real departure:** `lavalamp` | Emeritus on 31 code areas and on 39 design decisions. Nothing went dark: `deads2k`, `liggitt` and `sttts` already approve 22, 20 and 18 of those areas |
 | **A departure that arrived live:** `rexagod` | [PR #142237](https://github.com/kubernetes/kubernetes/pull/142237), "Move myself to emeritus" (Oct 3), replayed into the graph: 30 code areas changed, and every one still has 6 approvers. The graph then flags that `rexagod` is still listed as SIG Instrumentation lead in sigs.yaml |
 | **What if `thockin` left today?** | 137 code areas: 2 would have no local approver left and 8 would be down to one. 12 of 107 design decisions would have nobody active left who wrote or approved them, including IPVS load balancing and SCTP support. `draft_handoff` proposes a successor for each of the 10 at-risk areas and writes an OWNERS patch that `git apply` accepts |
@@ -133,9 +133,14 @@ grounding: N/N names in the answer came back from FalkorDB this session ✓
 ──────────────────────────────────────────────────────────────
 ```
 
-As a control, `python -m inheritance.agent --no-graph "..."` sends the same question to the
-same model with no tools. Its receipt shows how many of the names in that answer the graph
-never returned.
+**With and without FalkorDB.** `python scripts/compare_graph.py` sends the same three questions
+to the same model twice: once with the graph tools, once with no tools. It scores both answers:
+- the expected facts it contains, computed from the graph by the tools and not by the model;
+- how many names in it FalkorDB actually returned;
+- how many sources it cites.
+
+Both answers and the scores are written side by side to `docs/with_without.md`. For a single
+question, `python -m inheritance.agent --no-graph "..."` runs the same control.
 
 ## Honest outcomes
 
@@ -313,6 +318,7 @@ pip install -r requirements.txt
 python -m inheritance.load --reset         # builds the graph, ~10 s
 ./scripts/demo.sh                          # every demo beat without an LLM, ~25 s
 python scripts/prove_graph.py              # the checks above, ~2 min
+python scripts/compare_graph.py            # same questions with and without FalkorDB (needs an API key), ~3 min
 ```
 
 Ask the agent (needs an Anthropic API key):
