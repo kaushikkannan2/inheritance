@@ -1,0 +1,99 @@
+--- a/pkg/proxy/apis/config/OWNERS
++++ b/pkg/proxy/apis/config/OWNERS
+@@ -2,6 +2,7 @@
+ 
+ approvers:
+   - thockin
++  - aojea
+ reviewers:
+   - sig-network-reviewers
+ labels:
+--- a/vendor/sigs.k8s.io/randfill/OWNERS
++++ b/vendor/sigs.k8s.io/randfill/OWNERS
+@@ -4,5 +4,6 @@
+ approvers:
+   - sig-testing-leads
+   - thockin
++  - dims
+ 
+ reviewers: []
+--- a/pkg/apis/networking/OWNERS
++++ b/pkg/apis/networking/OWNERS
+@@ -2,6 +2,7 @@
+ 
+ approvers:
+   - sig-network-api-approvers
++  - aojea
+ reviewers:
+   - sig-network-api-reviewers
+ labels:
+--- a/pkg/registry/core/service/OWNERS
++++ b/pkg/registry/core/service/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - aojea
+   - thockin
++  - deads2k
+ reviewers:
+   - aojea
+   - thockin
+--- a/pkg/registry/networking/OWNERS
++++ b/pkg/registry/networking/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - aojea
+   - thockin
++  - deads2k
+ reviewers:
+   - aojea
+   - thockin
+--- a/pkg/volume/configmap/OWNERS
++++ b/pkg/volume/configmap/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - saad-ali
+   - thockin
++  - jsafrane
+ emeritus_approvers:
+   - matchstick
+   - pmorie
+--- a/pkg/volume/downwardapi/OWNERS
++++ b/pkg/volume/downwardapi/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - saad-ali
+   - thockin
++  - jsafrane
+ emeritus_approvers:
+   - matchstick
+   - pmorie
+--- a/pkg/volume/emptydir/OWNERS
++++ b/pkg/volume/emptydir/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - saad-ali
+   - thockin
++  - jsafrane
+ emeritus_approvers:
+   - matchstick
+   - pmorie
+--- a/pkg/volume/git_repo/OWNERS
++++ b/pkg/volume/git_repo/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - thockin
+   - saad-ali
++  - jsafrane
+ reviewers:
+   - saad-ali
+   - jsafrane
+--- a/pkg/volume/secret/OWNERS
++++ b/pkg/volume/secret/OWNERS
+@@ -3,6 +3,7 @@
+ approvers:
+   - saad-ali
+   - thockin
++  - jsafrane
+ emeritus_approvers:
+   - matchstick
+   - pmorie

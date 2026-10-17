@@ -4,6 +4,7 @@ Sources (all public, Apache 2.0):
   kubernetes/kubernetes   every OWNERS file + OWNERS_ALIASES  -> who may approve which code
   kubernetes/community    sigs.yaml                          -> teams, leads, subprojects
   kubernetes/enhancements keps/**/kep.yaml                   -> design decisions and who made them
+  kubernetes/enhancements keps/**/README.md                  -> the design documents: summary, motivation, alternatives
 
 People are GitHub handles only. Names, employers and emails in sigs.yaml are never loaded.
 
@@ -28,6 +29,8 @@ BATCH = 2000
 
 def _handle(x):
     h = str(x).strip().lstrip("@").lower() if x else ""
+    if re.search(r"-(approvers|reviewers|leads|maintainers|owners)$", h):
+        return None  # an alias name that was never defined, not a person
     return h if re.fullmatch(r"[a-z0-9][a-z0-9-]{0,38}", h) else None  # GitHub handle rules; drops free text
 
 
@@ -149,6 +152,35 @@ def parse_keps(root=f"{RAW}/enhancements/keps"):
     return keps
 
 
+def _section(md, names, limit=1500):
+    """Text of the first '## <name>' section (including its ### subsections), cleaned and trimmed."""
+    for name in names:
+        m = re.search(rf"^##\s+{name}\b.*?$(.*?)(?=^##\s|\Z)", md, re.M | re.S | re.I)
+        if m:
+            t = re.sub(r"<!--.*?-->", "", m.group(1), flags=re.S)
+            t = re.sub(r"\n{3,}", "\n\n", t).strip()
+            if t:
+                return t[:limit] + ("…" if len(t) > limit else "")
+    return ""
+
+
+def parse_docs(root=f"{RAW}/enhancements/keps"):
+    """Each KEP's design document (README.md): the summary, the motivation and the
+    alternatives considered. This is the 'why' behind a decision, in the authors' words."""
+    docs = []
+    for p in glob.glob(f"{root}/**/README.md", recursive=True):
+        if "NNNN" in p or not os.path.exists(os.path.join(os.path.dirname(p), "kep.yaml")):
+            continue
+        m = re.search(r"/(\d+)-[^/]+/README\.md$", p)
+        if not m:
+            continue
+        md = open(p, errors="replace").read()
+        docs.append(dict(kep=str(int(m.group(1))), path=p.split("keps/", 1)[1],
+                         summary=_section(md, ["Summary"]), motivation=_section(md, ["Motivation"]),
+                         alternatives=_section(md, ["Alternatives", "Alternatives Considered"])))
+    return docs
+
+
 # ------------------------------------------------------------------ load
 
 def _git(*args, root=f"{RAW}/k8s"):
@@ -250,6 +282,19 @@ def load(reset=False, name=None, as_of=None):
     for b in _batches(rows):
         g.query("""UNWIND $rows AS r MATCH (a:Person {handle:r.a}), (b:Person {handle:r.b})
                    CREATE (a)-[:WORKED_WITH {weight:r.w}]->(b)""", {"rows": b})
+    # design documents: the reasoning behind each decision
+    keps_sha = _git("rev-parse", "HEAD", root=f"{RAW}/enhancements")
+    docs = [d for d in parse_docs() if d["summary"] or d["motivation"]]
+    for b in _batches(docs):
+        g.query("""UNWIND $rows AS r MATCH (k:KEP {number:r.kep})
+                   CREATE (d:Document {kep:r.kep, path:r.path, summary:r.summary, motivation:r.motivation,
+                                       alternatives:r.alternatives, url:r.url})-[:DESCRIBES]->(k)""",
+                {"rows": [dict(d, url=f"https://github.com/kubernetes/enhancements/blob/{keps_sha[:12]}/keps/{d['path']}") for d in b]})
+    try:
+        g.query("CALL db.idx.fulltext.createNodeIndex('Document', 'summary', 'motivation', 'alternatives')")
+    except Exception as e:
+        if "already" not in str(e).lower():
+            raise
     sha = _git("rev-parse", "HEAD")
     g.query("MERGE (s:Source {repo:'kubernetes/kubernetes'}) SET s.sha = $sha, s.date = $date, s.loaded = $date",
             {"sha": sha, "date": _git("log", "-1", "--format=%cs", sha)})
@@ -259,7 +304,7 @@ def load(reset=False, name=None, as_of=None):
         if "already" not in str(e).lower():
             raise
     return dict(dirs=len(dirs), people=len(people), active=len(active), departed=len(marked - active),
-                teams=len(teams), subprojects=len(subs), keps=len(keps), worked_with=len(rows))
+                teams=len(teams), subprojects=len(subs), keps=len(keps), documents=len(docs), worked_with=len(rows))
 
 
 if __name__ == "__main__":

@@ -6,6 +6,12 @@
   python -m inheritance.cli leaves thockin liggitt deads2k      # group departure
   python -m inheritance.cli heirs lavalamp
   python -m inheritance.cli why "sidecar containers"
+  python -m inheritance.cli approves pkg/apis/core/validation/validation.go --climb 0   # shallow view
+  python -m inheritance.cli knows sidecar containers
+  python -m inheritance.cli handoff thockin                     # ACTION: writes out/handoffs/*.md + .patch
+  python -m inheritance.cli route pkg/proxy/conntrack/cleanup.go "Why is this entry dropped?"   # ACTION
+  python -m inheritance.cli changes [handle]
+  python -m inheritance.cli flags
   python -m inheritance.cli spof
   python -m inheritance.cli orphans
   python -m inheritance.cli shadow
@@ -20,9 +26,10 @@ from . import tools
 
 def main():
     ap = argparse.ArgumentParser(description="Inheritance tools")
-    ap.add_argument("cmd", choices=["find", "whois", "approves", "leaves", "heirs", "why", "spof",
-                                    "orphans", "shadow", "keystones", "recall", "ask"])
+    ap.add_argument("cmd", choices=["find", "whois", "approves", "leaves", "heirs", "why", "knows", "handoff", "route",
+                                    "changes", "flags", "spof", "orphans", "shadow", "keystones", "recall", "ask"])
     ap.add_argument("args", nargs="*")
+    ap.add_argument("--climb", type=int, default=None, help="approves: how many OWNERS levels to climb")
     a = ap.parse_args()
     x = a.args
     try:
@@ -33,7 +40,12 @@ def main():
         out = {
             "find": lambda: tools.find_person(x[0]),
             "whois": lambda: tools.whois(x[0]),
-            "approves": lambda: tools.who_approves(x[0]),
+            "approves": lambda: tools.who_approves(x[0], a.climb),
+            "knows": lambda: tools.TOOLS["who_knows"][0](" ".join(x)),
+            "handoff": lambda: tools.TOOLS["draft_handoff"][0](x[0], x[1:]),
+            "route": lambda: tools.TOOLS["route_question"][0](" ".join(x[1:]) or "question", path=x[0]),
+            "changes": lambda: tools.recent_changes(x[0] if x else None),
+            "flags": lambda: tools.TOOLS["flag_stale_records"][0](),
             "leaves": lambda: tools.departure_impact(x[0], x[1:]),
             "heirs": lambda: tools.heirs(x[0]),
             "why": lambda: tools.why(" ".join(x)),

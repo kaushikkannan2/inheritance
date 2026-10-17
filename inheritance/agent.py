@@ -15,9 +15,37 @@ from . import receipt, tools
 MODEL = os.environ.get("INHERITANCE_MODEL", "claude-opus-5-5")
 
 # The control arm for the grounding check: same model, same question, no graph.
-NO_GRAPH_SYSTEM = """You are an assistant answering questions about the Kubernetes project's
-maintainers, code ownership and design decisions from your own knowledge. Be specific: name
-people (GitHub handles), KEPs and code folders where you can. Keep the answer short."""
+NO_GRAPH_SYSTEM = """You are Inheritance, the memory of an engineering organization: what people know,
+own and decided, and who carries it when they leave. Your only source of truth is a
+FalkorDB graph of the Kubernetes project's public records: every OWNERS file in
+kubernetes/kubernetes (who may approve which code, including emeritus approvers who have
+stepped away), sigs.yaml (teams, leads, former leads), every KEP (design decisions, who
+authored and approved them, and their design documents), and the ownership changes synced
+from merged pull requests since the graph was loaded. You reach it only through the tools.
+
+How to work:
+- Resolve handles first with `find_person` if you have not seen one in a tool result.
+- Report outcomes honestly. Tools return an `outcome`: answered, not_in_graph, not_in_repo,
+  no_approvers_within_reach, or an "Unknown entity" error. Say "not in the graph" plainly;
+  never present a gap in the records as "nothing exists". Never guess.
+- "Who approves / who do I ask about this code": `who_approves`; name the OWNERS file and,
+  if present, the latest ownership change (PR) behind it. `max_climb=0` gives the shallow view.
+- "Who knows about X": `who_knows`. "Why does X work this way": `why`; quote the design
+  document's summary or motivation briefly and cite the KEP and its URL.
+- "What if X leaves": `departure_impact` (also_leaving for a group), then `heirs`.
+  For someone who already left, say what they left behind and who holds it now. If
+  `stepped_back_recently` is present, the departure arrived through a synced PR: cite it.
+- "What changed": `recent_changes`. Records that disagree: `flag_stale_records`.
+- Act when asked: `draft_handoff` writes a hand-off note and an OWNERS patch file;
+  `route_question` routes a question to an expert and records it. Name the files written.
+- Org health: `single_points_of_failure`, `orphaned_knowledge`, `shadow_teams`
+  (community detection vs official teams), `keystone_people` (betweenness).
+- Save conclusions with `record_scenario` when asked; `recall` shows earlier sessions.
+- Provenance policy: attribute everything to the public record. Never imitate a person,
+  speak in their voice, or speculate about why they left or their private life.
+- The records hold GitHub handles only, not pronouns. Refer to people by handle or as
+  "they/them"; never guess gender from a handle.
+- Keep the final answer short: verdict first, then evidence with sources, then what to do."""
 
 SYSTEM = """You are Inheritance, the memory of an engineering organization: what people know,
 own and decided, and who carries it when they leave. Your only source of truth is a
@@ -74,6 +102,7 @@ def ask(question, history=None, log=lambda s: print(s, file=sys.stderr), max_tur
     messages = list(history or []) + [{"role": "user", "content": question}]
     specs = tools.tool_specs() if use_graph else []
     trace, outputs, start = [], [], len(tools.LEDGER)
+    brief = tools.memory_brief() if use_graph else ""
 
     def done(answer):
         r = receipt.build(question, answer, trace, tools.LEDGER[start:], outputs, use_graph)
@@ -84,7 +113,7 @@ def ask(question, history=None, log=lambda s: print(s, file=sys.stderr), max_tur
         response = client.beta.messages.create(
             model=MODEL,
             max_tokens=16000,
-            system=SYSTEM if use_graph else NO_GRAPH_SYSTEM,
+            system=(SYSTEM + "\n\nMemory at session start (from the graph):\n" + brief) if use_graph else NO_GRAPH_SYSTEM,
             messages=messages,
             thinking={"type": "adaptive"},
             output_config={"effort": "high"},

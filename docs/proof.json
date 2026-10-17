@@ -1,28 +1,169 @@
 {
-  "at": "2026-10-17T18:41:26",
+  "at": "2026-10-17T21:18:34",
+  "incremental": {
+    "prs": [
+      {
+        "pr": "141468",
+        "date": "2026-08-27",
+        "title": "OWNERS: add troychiu as reviewer for DRA components",
+        "folders": 4
+      },
+      {
+        "pr": "141501",
+        "date": "2026-08-27",
+        "title": "Add jpbetz to /hack OWNERS",
+        "folders": 1
+      },
+      {
+        "pr": "141503",
+        "date": "2026-08-27",
+        "title": "DRA: add nojnhuh to reviewers",
+        "folders": 7
+      },
+      {
+        "pr": "140865",
+        "date": "2026-08-27",
+        "title": "Add Argh4k to the SIG Scheduling reviewers",
+        "folders": 16
+      },
+      {
+        "pr": "140899",
+        "date": "2026-08-31",
+        "title": "Add brejman to sig-scheduling reviewers",
+        "folders": 16
+      },
+      {
+        "pr": "141770",
+        "date": "2026-09-02",
+        "title": "add BenTheElder to conformance approvers",
+        "folders": 3
+      },
+      {
+        "pr": "141797",
+        "date": "2026-09-08",
+        "title": "Nominate mm4tt as SIG scheduling approver",
+        "folders": 11
+      },
+      {
+        "pr": "141996",
+        "date": "2026-09-11",
+        "title": "Use model to validate linarizability of storage using porcupine library",
+        "folders": 1
+      },
+      {
+        "pr": "142086",
+        "date": "2026-09-14",
+        "title": "Fix OWNERS file typo",
+        "folders": 1
+      },
+      {
+        "pr": "142153",
+        "date": "2026-09-16",
+        "title": "Add yongruilin as code-generator reviewer in OWNERS file",
+        "folders": 1
+      },
+      {
+        "pr": "141914",
+        "date": "2026-09-20",
+        "title": "nominate pacoxu as SIG Scheduling reviewer",
+        "folders": 14
+      },
+      {
+        "pr": "142237",
+        "date": "2026-10-03",
+        "title": "Move myself to emeritus",
+        "folders": 35
+      },
+      {
+        "pr": "142700",
+        "date": "2026-10-06",
+        "title": "delete kubemark",
+        "folders": 7
+      },
+      {
+        "pr": "142146",
+        "date": "2026-10-07",
+        "title": "ktesting: publishing via staging",
+        "folders": 2
+      },
+      {
+        "pr": "142872",
+        "date": "2026-10-12",
+        "title": "Measure allocation per request",
+        "folders": 1
+      },
+      {
+        "pr": "142752",
+        "date": "2026-10-12",
+        "title": "Change in SIG Cluster Lifecycle leadership",
+        "folders": 1
+      },
+      {
+        "pr": "142840",
+        "date": "2026-10-14",
+        "title": "fix cluster approvers",
+        "folders": 10
+      },
+      {
+        "pr": "142954",
+        "date": "2026-10-15",
+        "title": "self-nominate pravk03 to be a sig-node reviewer",
+        "folders": 33
+      }
+    ],
+    "checks": {
+      "ownership": {
+        "rows": 6040,
+        "equal": true
+      },
+      "tree": {
+        "rows": 585,
+        "equal": true
+      },
+      "dirs": {
+        "rows": 586,
+        "equal": true
+      },
+      "status": {
+        "rows": 850,
+        "equal": true
+      },
+      "worked_with": {
+        "rows": 11579,
+        "equal": true
+      }
+    },
+    "equal": true
+  },
   "integrity": {
     "nodes": {
-      "Person": 853,
+      "Document": 675,
+      "Change": 18,
+      "Person": 850,
       "Dir": 586,
       "Subproject": 241,
       "KEP": 679,
-      "Team": 37
+      "Team": 37,
+      "Source": 1
     },
     "edges": {
       "EMERITUS_OF": 318,
+      "DESCRIBES": 675,
       "PART_OF": 241,
       "REPLACES": 8,
       "INVOLVES": 469,
+      "TOUCHED": 150,
       "LED": 124,
       "REVIEWED": 1964,
       "REVIEWS": 3104,
+      "AFFECTED": 225,
       "OWNED_BY": 683,
-      "APPROVED": 1305,
-      "APPROVES": 2619,
+      "APPROVED": 1294,
+      "APPROVES": 2618,
       "LEADS": 174,
       "AUTHORED": 1148,
       "OWNS": 150,
-      "WORKED_WITH": 11613,
+      "WORKED_WITH": 11579,
       "CHILD_OF": 585
     },
     "owners_files_on_disk": 586
@@ -49,7 +190,7 @@
     "need_climb": 28108,
     "need_climb_pct": 89.4,
     "via_child_of": 1829,
-    "seconds": 49.5
+    "seconds": 76.9
   },
   "ablation": {
     "baseline": {
@@ -72,14 +213,15 @@
       ],
       "if thockin left": [
         137,
-        1,
-        9,
+        2,
+        8,
         12,
         [
           "Network"
         ],
         [
-          "kubernetes/kubernetes/pkg/proxy/OWNERS"
+          "kubernetes/kubernetes/pkg/proxy/OWNERS",
+          "kubernetes/kubernetes/vendor/OWNERS"
         ]
       ],
       "who can explain sidecars": [
@@ -89,7 +231,7 @@
         "thockin"
       ],
       "single points of failure": [
-        45,
+        46,
         8
       ],
       "orphaned decisions": 4,
@@ -131,13 +273,14 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             12,
             [
               "Network"
             ],
             [
+              null,
               null
             ]
           ],
@@ -148,7 +291,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             0
           ],
           "orphaned decisions": 4,
@@ -244,14 +387,15 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             12,
             [
               "Network"
             ],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -261,7 +405,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 4,
@@ -298,14 +442,15 @@
           "lavalamp's heirs": [],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             12,
             [
               "Network"
             ],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -315,7 +460,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 4,
@@ -357,14 +502,15 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             42,
             [
               "Network"
             ],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -372,7 +518,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 16,
@@ -414,14 +560,15 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             4,
             [
               "Network"
             ],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -429,7 +576,7 @@
             "sergeykanzhelev"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 83,
@@ -468,12 +615,13 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             12,
             [],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -483,7 +631,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 4,
@@ -522,14 +670,15 @@
           ],
           "if thockin left": [
             137,
-            1,
-            9,
+            2,
+            8,
             12,
             [
               "Network"
             ],
             [
-              "kubernetes/kubernetes/pkg/proxy/OWNERS"
+              "kubernetes/kubernetes/pkg/proxy/OWNERS",
+              "kubernetes/kubernetes/vendor/OWNERS"
             ]
           ],
           "who can explain sidecars": [
@@ -539,7 +688,7 @@
             "thockin"
           ],
           "single points of failure": [
-            45,
+            46,
             8
           ],
           "orphaned decisions": 4,
@@ -625,26 +774,26 @@
       "args": {
         "path": "pkg/kubelet/kuberuntime/kuberuntime_container.go"
       },
-      "queries": 3,
+      "queries": 5,
       "by_kind": {
-        "match": 2,
+        "match": 4,
         "traversal": 1
       },
-      "rows": 46,
-      "ms": 9.1
+      "rows": 48,
+      "ms": 12.8
     },
     {
       "tool": "departure_impact",
       "args": {
         "handle": "thockin"
       },
-      "queries": 7,
+      "queries": 11,
       "by_kind": {
-        "match": 6,
-        "traversal": 1
+        "match": 9,
+        "traversal": 2
       },
-      "rows": 395,
-      "ms": 38.9
+      "rows": 406,
+      "ms": 45.7
     },
     {
       "tool": "departure_impact",
@@ -655,13 +804,13 @@
           "deads2k"
         ]
       },
-      "queries": 9,
+      "queries": 13,
       "by_kind": {
-        "match": 8,
-        "traversal": 1
+        "match": 11,
+        "traversal": 2
       },
-      "rows": 737,
-      "ms": 65.3
+      "rows": 748,
+      "ms": 65.2
     },
     {
       "tool": "heirs",
@@ -673,20 +822,20 @@
         "match": 17
       },
       "rows": 56,
-      "ms": 57.3
+      "ms": 47.5
     },
     {
       "tool": "why",
       "args": {
         "topic": "sidecar containers"
       },
-      "queries": 7,
+      "queries": 9,
       "by_kind": {
         "fulltext": 1,
-        "match": 6
+        "match": 8
       },
-      "rows": 14,
-      "ms": 21.7
+      "rows": 16,
+      "ms": 21.4
     },
     {
       "tool": "single_points_of_failure",
@@ -697,7 +846,7 @@
         "match": 1
       },
       "rows": 16,
-      "ms": 15.2
+      "ms": 9.5
     },
     {
       "tool": "orphaned_knowledge",
@@ -707,7 +856,7 @@
         "match": 3
       },
       "rows": 6,
-      "ms": 17.9
+      "ms": 16.2
     },
     {
       "tool": "shadow_teams",
@@ -719,8 +868,8 @@
         "match": 3,
         "traversal": 586
       },
-      "rows": 9498,
-      "ms": 1735.2
+      "rows": 9494,
+      "ms": 1580.5
     },
     {
       "tool": "keystone_people",
@@ -731,7 +880,7 @@
         "algorithm": 1
       },
       "rows": 10,
-      "ms": 350.5
+      "ms": 399.7
     }
   ]
 }

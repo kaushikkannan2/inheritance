@@ -402,6 +402,12 @@ def why(topic: str, limit: int = 5):
         rows = []
     if not rows:
         rows = _q("MATCH (k:KEP) WHERE toLower(k.title) CONTAINS toLower($q) RETURN k.number, 1.0 LIMIT $n", {"q": t, "n": int(limit)})
+    if not rows:  # not in any title: search the design documents' text
+        try:
+            rows = _q("CALL db.idx.fulltext.queryNodes('Document', $q) YIELD node, score RETURN node.kep, score ORDER BY score DESC LIMIT $n",
+                      {"q": t, "n": max(1, min(int(limit), 10))})
+        except Exception:
+            rows = []
     if not rows:
         return {"topic": topic, "outcome": "not_in_graph", "decisions": [],
                 "message": f"Not in the graph: no Kubernetes design decision (KEP) matches '{topic}'. This is a gap in the records, not evidence that nothing exists."}
@@ -412,10 +418,15 @@ def why(topic: str, limit: int = 5):
         ppl = _q("MATCH (p:Person)-[r:AUTHORED|APPROVED]->(:KEP {number:$n}) RETURN p.handle, p.status, type(r)", {"n": n})
         rep = [f"KEP-{r[0]} {r[1]}" for r in _q("MATCH (:KEP {number:$n})-[:REPLACES]->(o:KEP) RETURN o.number, o.title", {"n": n})]
         active = sorted({p for p, s, _ in ppl if s == "active"})
+        doc = _q("MATCH (d:Document)-[:DESCRIBES]->(:KEP {number:$n}) RETURN d.summary, d.motivation, d.alternatives, d.url", {"n": n})
+        design = None
+        if doc:
+            cut = lambda t: (t[:420] + "…") if t and len(t) > 420 else t
+            design = dict(summary=cut(doc[0][0]), motivation=cut(doc[0][1]), alternatives_considered=cut(doc[0][2]) or None, source=doc[0][3])
         out.append(dict(kep=n, title=k[0], status=k[1], stage=k[2], latest_milestone=k[3], created=k[4], team=k[6],
                         authors=sorted({p for p, s, r in ppl if r == "AUTHORED"}),
                         approvers=sorted({p for p, s, r in ppl if r == "APPROVED"}),
-                        replaces=rep, can_still_explain=active, source=_src_kep(k[5])))
+                        replaces=rep, can_still_explain=active, source=_src_kep(k[5]), design_doc=design))
     return {"topic": topic, "outcome": "answered", "decisions": out, "policy": POLICY}
 
 
@@ -435,13 +446,43 @@ def record_scenario(handle: str, note: str):
 
 
 def recall(handle: str = None):
-    """Scenarios saved in earlier sessions, optionally for one person."""
-    if handle:
-        h, _ = _person(handle)
-        rows = _q("MATCH (s:Scenario)-[:ABOUT]->(p:Person {handle:$h}) RETURN s.id, s.at, p.handle, s.note, s.dark, s.thin ORDER BY s.at DESC LIMIT 10", {"h": h})
-    else:
-        rows = _q("MATCH (s:Scenario)-[:ABOUT]->(p:Person) RETURN s.id, s.at, p.handle, s.note, s.dark, s.thin ORDER BY s.at DESC LIMIT 10")
-    return [dict(id=i, at=a, about=p, note=n, dark_areas=d, thin_areas=t) for i, a, p, n, d, t in rows]
+    """Everything earlier sessions left in the graph: saved scenarios, hand-offs drafted,
+    questions routed and record conflicts flagged, newest first, optionally for one person."""
+    h = _person(handle)[0] if handle else None
+    w = "WHERE p.handle = $h" if h else ""
+    q = lambda c: _q(c.replace("$W", w), {"h": h})
+    return {
+        "scenarios": [dict(at=a, about=p, note=n, dark_areas=d, thin_areas=t) for a, p, n, d, t in q(
+            "MATCH (s:Scenario)-[:ABOUT]->(p:Person) $W RETURN s.at, p.handle, s.note, s.dark, s.thin ORDER BY s.at DESC LIMIT 8")],
+        "handoffs": [dict(at=a, about=p, note=n, areas=k, patched=pt, proposed=sorted(set(pr))) for a, p, n, k, pt, pr in q(
+            """MATCH (x:Handoff)-[:FOR]->(p:Person) $W OPTIONAL MATCH (x)-[:PROPOSES]->(s:Person)
+               RETURN x.at, p.handle, x.note, x.areas, x.patched, collect(s.handle) ORDER BY x.at DESC LIMIT 8""")],
+        "questions": [dict(at=a, question=t, path=pa, topic=tp, routed_to=p) for a, t, pa, tp, p in q(
+            """MATCH (x:Question)-[:ROUTED_TO {role:'primary'}]->(p:Person) $W
+               RETURN x.at, x.text, x.path, x.topic, p.handle ORDER BY x.at DESC LIMIT 8""")],
+        "flags": [dict(at=a, about=p, kind=k, detail=d) for a, p, k, d in q(
+            "MATCH (f:Flag)-[:ABOUT]->(p:Person) $W RETURN f.at, p.handle, f.kind, f.detail ORDER BY f.at DESC LIMIT 8")],
+    }
+
+
+def memory_brief():
+    """A short, timestamped digest of graph memory for the start of a session."""
+    r = recall()
+    lines = []
+    for x in r["handoffs"][:3]:
+        lines.append(f"- {x['at']}: hand-off drafted for {x['about']} ({x['areas']} areas, proposed {', '.join(x['proposed']) or 'none'}; note {x['note']})")
+    for x in r["questions"][:3]:
+        lines.append(f"- {x['at']}: question routed to {x['routed_to']}: \"{x['question'][:90]}\"")
+    for x in r["scenarios"][:3]:
+        lines.append(f"- {x['at']}: scenario saved about {x['about']}: {x['note'][:120]}")
+    for x in r["flags"][:3]:
+        lines.append(f"- {x['at']}: flagged {x['about']}: {x['detail'][:120]}")
+    ch = _q("MATCH (c:Change) RETURN c.date, c.pr, c.title ORDER BY c.date DESC LIMIT 3")
+    for d, pr, t in ch:
+        lines.append(f"- {d}: ownership change synced, PR #{pr} {t}")
+    a = _as_of()
+    head = f"Graph reflects kubernetes/kubernetes at {a['commit']} ({a['date']})." if a else ""
+    return head + ("\n" + "\n".join(lines) if lines else "\nNo memory from earlier sessions yet.")
 
 
 # ------------------------------------------------------------------ registry
@@ -460,7 +501,7 @@ TOOLS = {
     "keystone_people": (keystone_people, "Betweenness centrality: people who connect groups that otherwise would not talk.", {"top": {"type": "integer"}}, []),
     "why": (why, "Trace a feature or topic to the design decisions (KEPs) behind it, who made them and who can still explain them.", {"topic": {"type": "string"}, "limit": {"type": "integer"}}, ["topic"]),
     "record_scenario": (record_scenario, "Save a departure scenario and conclusion to memory.", {"handle": _H, "note": {"type": "string"}}, ["handle", "note"]),
-    "recall": (recall, "Recall saved departure scenarios.", {"handle": _H}, []),
+    "recall": (recall, "Recall what earlier sessions saved in the graph: scenarios, hand-offs, routed questions, flags. Optionally for one person.", {"handle": _H}, []),
 }
 
 
@@ -473,3 +514,6 @@ def call(name, args):
     if name not in TOOLS:
         raise ToolError(f"unknown tool {name}")
     return TOOLS[name][0](**(args or {}))
+
+
+from . import actions  # noqa: E402,F401  registers the action tools (who_knows, draft_handoff, ...)

@@ -13,6 +13,7 @@
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -64,6 +65,8 @@ def _walker():
         out = set()
         for x in lst or []:
             x = str(x).strip()
+            if x not in aliases and re.search(r"-(approvers|reviewers|leads|maintainers|owners)$", x):
+                continue  # an alias that is never defined names no one
             for y in aliases.get(x, [x]):
                 out.add(str(y).strip().lstrip("@").lower())
         return out
@@ -242,9 +245,23 @@ def receipts():
     return out
 
 
+def incremental():
+    """Load the graph as of Aug 20, replay every ownership PR since, compare with a fresh load."""
+    from inheritance import load, sync
+    load.load(reset=True, as_of="2026-08-20")
+    applied = sync.sync(log=lambda *_: None)
+    rep = sync.verify()
+    ok = all(v["equal"] for v in rep.values())
+    print(f"replayed {len(applied)} merged PRs from 2026-08-20; synced graph equals a fresh load: "
+          + ("YES" if ok else "NO") + "  (" + ", ".join(f"{k} {v['rows']:,}" for k, v in rep.items()) + ")")
+    return dict(prs=[dict(pr=a["pr"], date=a["date"], title=a["title"], folders=len(a["changes"])) for a in applied],
+                checks={k: dict(rows=v["rows"], equal=v["equal"]) for k, v in rep.items()}, equal=ok)
+
+
 if __name__ == "__main__":
     os.chdir(os.path.join(os.path.dirname(__file__), ".."))
     res = {"at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+    step("0. keeping current: replay real ownership changes, compare with a fresh load"); res["incremental"] = incremental()
     step("1. integrity"); res["integrity"] = integrity()
     step("2-3. correctness against the raw OWNERS files, and depth"); res["correctness"] = correctness()
     step("4. ablation: remove one relationship type, re-ask the headline questions"); res["ablation"] = ablation()
