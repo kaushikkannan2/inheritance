@@ -23,6 +23,13 @@ Built for **Graph Hacks** (FalkorDB × WeMakeDevs). **Track entered: Track 03, C
 
 ## Graph map
 
+<p align="center"><img src="docs/graph-map.svg" alt="Graph map: the nodes, relationships and the numbered path the agent walks" width="100%"></p>
+
+<sub>Simplified to the agent's main path; the full schema is in [Data model](#data-model). The image is drawn by `scripts/graph_map.py`.</sub>
+
+<details>
+<summary>Interactive version (zoom and pan)</summary>
+
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontSize":"15px","lineColor":"#8C93A8","edgeLabelBackground":"#FFFFFF"}}}%%
 flowchart LR
@@ -58,15 +65,7 @@ flowchart LR
   linkStyle 7 stroke:#C73E86,stroke-width:2.5px
 ```
 
-**How the agent walks it** when someone leaves (the numbers match the arrows):
-1. **What they own:** follow `APPROVES` from the person to every code folder they approve.
-2. **Who else can approve:** climb `CHILD_OF` up the folder tree to count the approvers left.
-3. **What they decided:** follow `AUTHORED` / `APPROVED` to design decisions, and `DESCRIBES` to the reason behind each.
-4. **Who carries it on:** rank their `WORKED_WITH` neighbors who already approve the same code.
-5. **Act:** write a `Handoff` node, a hand-off note and an OWNERS patch.
-6. **Stay current:** each merged PR becomes a `Change` that rewrites only the folders it `TOUCHED`.
-
-<sub>🟣 people · 🟠 code · 🟢 design decisions · 🩷 teams · 🔵 live changes · 🟡 written by the agent · Simplified to the agent's main path; the full schema is in [Data model](#data-model).</sub>
+</details>
 
 **How the agent queries it.** Claude never writes Cypher. It picks one of 17 fixed tools, and
 each tool is a graph query (full list and Cypher below):
