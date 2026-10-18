@@ -26,27 +26,22 @@ Built for **Graph Hacks** (FalkorDB × WeMakeDevs). **Track entered: Track 03, C
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontSize":"15px","lineColor":"#8C93A8","edgeLabelBackground":"#FFFFFF"}}}%%
 flowchart LR
+  C["🔀 Change<br/>merged PR"]:::change
   P(("👤 Person")):::person
   D["📁 Dir<br/>code folder"]:::code
-  T["👥 Team"]:::team
-  S["🧩 Subproject"]:::team
   K["💡 KEP<br/>design decision"]:::decision
   Doc["📄 Document<br/>why it was built"]:::decision
-  C["🔀 Change<br/>merged PR, synced live"]:::change
-  H["🧠 Handoff · Question · Flag<br/>agent memory"]:::memory
+  T["👥 Team"]:::team
+  H["🧠 Handoff · Flag<br/>written by the agent"]:::memory
 
-  P -- "APPROVES · REVIEWS · EMERITUS_OF" --> D
-  D -- "CHILD_OF" --> D
-  P -- "WORKED_WITH" --> P
-  P -- "LEADS · LED" --> T
-  S -- "PART_OF" --> T
-  S -- "OWNS" --> D
-  P -- "AUTHORED · REVIEWED · APPROVED" --> K
-  K -- "OWNED_BY · INVOLVES" --> T
-  Doc -- "DESCRIBES" --> K
-  C -- "TOUCHED" --> D
-  C -- "AFFECTED" --> P
-  H -- "FOR · ROUTED_TO · ABOUT" --> P
+  P -- "① APPROVES<br/>what they own" --> D
+  D -- "② CHILD_OF<br/>climb to find backup" --> D
+  P -- "③ AUTHORED · APPROVED<br/>what they decided" --> K
+  Doc -- "③ DESCRIBES<br/>why" --> K
+  P -- "④ WORKED_WITH<br/>who carries it on" --> P
+  H -- "⑤ FOR<br/>hand-off + OWNERS patch" --> P
+  C -- "⑥ TOUCHED<br/>keeps it current" --> D
+  P -- "LEADS<br/>stale-lead check" --> T
 
   classDef person fill:#8C7CFF,stroke:#5B4BD6,stroke-width:3px,color:#FFFFFF
   classDef code fill:#FFA866,stroke:#E0782F,stroke-width:3px,color:#1A1206
@@ -56,14 +51,22 @@ flowchart LR
   classDef memory fill:#FDE68A,stroke:#D4A514,stroke-width:3px,color:#2A2003
 
   linkStyle 0,1 stroke:#E0782F,stroke-width:2.5px
-  linkStyle 2 stroke:#5B4BD6,stroke-width:2.5px
-  linkStyle 3,4,5 stroke:#C73E86,stroke-width:2.5px
-  linkStyle 6,7,8 stroke:#1FA592,stroke-width:2.5px
-  linkStyle 9,10 stroke:#2563EB,stroke-width:2.5px
-  linkStyle 11 stroke:#D4A514,stroke-width:2.5px
+  linkStyle 2,3 stroke:#1FA592,stroke-width:2.5px
+  linkStyle 4 stroke:#5B4BD6,stroke-width:2.5px
+  linkStyle 5 stroke:#D4A514,stroke-width:2.5px
+  linkStyle 6 stroke:#2563EB,stroke-width:2.5px
+  linkStyle 7 stroke:#C73E86,stroke-width:2.5px
 ```
 
-<sub>🟣 people · 🟠 code · 🟢 design decisions · 🩷 teams · 🔵 live changes · 🟡 agent memory</sub>
+**How the agent walks it** when someone leaves (the numbers match the arrows):
+1. **What they own:** follow `APPROVES` from the person to every code folder they approve.
+2. **Who else can approve:** climb `CHILD_OF` up the folder tree to count the approvers left.
+3. **What they decided:** follow `AUTHORED` / `APPROVED` to design decisions, and `DESCRIBES` to the reason behind each.
+4. **Who carries it on:** rank their `WORKED_WITH` neighbors who already approve the same code.
+5. **Act:** write a `Handoff` node, a hand-off note and an OWNERS patch.
+6. **Stay current:** each merged PR becomes a `Change` that rewrites only the folders it `TOUCHED`.
+
+<sub>🟣 people · 🟠 code · 🟢 design decisions · 🩷 teams · 🔵 live changes · 🟡 written by the agent · Simplified to the agent's main path; the full schema is in [Data model](#data-model).</sub>
 
 **How the agent queries it.** Claude never writes Cypher. It picks one of 17 fixed tools, and
 each tool is a graph query (full list and Cypher below):
