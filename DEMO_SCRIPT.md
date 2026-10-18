@@ -1,62 +1,49 @@
-# Inheritance: demo video script (~4 min)
+# Inheritance: demo video script (~3 min, terminal only)
 
-Setup before recording:
-- `python -m inheritance.load --reset --as-of 2026-10-01`, so the graph starts on Oct 1.
-- Open the FalkorDB Browser at http://localhost:3000.
-- Have the visuals page open.
+The video shows the agent running from start to finish. No slides.
 
-The agent beats use `python -m inheritance.agent`. `./scripts/demo.sh` replays the same
-beats without the LLM.
+**Before recording**
+- Start FalkorDB with `docker compose up -d`.
+- In the terminal: `export ANTHROPIC_API_KEY=...`. Do this off camera, and never show the key.
+- Load the graph as of Oct 1: `python -m inheritance.load --reset --as-of 2026-10-01`
+- Make the terminal font large. The agent prints each tool call as it runs and a receipt
+  after each answer. Leave both on screen; they show the graph doing the work.
 
-**1. Hook (0:00–0:20).** "When someone leaves a company, their badge stops working the same
-day. What they knew stays scattered across the code they owned, the decisions they made and
-the people they worked with. Inheritance maps all of that as a graph, keeps it current, and
-does the hand-off work."
+**1. Start (0:00–0:15).** Run `python -m inheritance.agent`.
+Say: "When someone leaves a company, what they knew leaves with them. Inheritance is an AI
+agent that answers from a FalkorDB graph of Kubernetes' public records: who owns which code,
+who made which design decisions, and who works with whom."
 
-**2. Real data (0:20–0:40).** "This is Kubernetes, one of the largest engineering
-organizations in open source. Its ownership, team and design-decision records are public:
-850 people, 586 code areas, 683 design decisions with their design documents, and 137 real
-departures. When a maintainer steps away, their name moves to an emeritus list." *Show
-lavalamp's neighbourhood in the FalkorDB Browser.*
+**2. Who do I ask? (0:15–0:40).** Type: *Who can approve pkg/apis/core/validation/validation.go?*
+Say: "Its own folder names nobody who can approve. The agent climbs the folder tree in the
+graph and finds six approvers two levels up. For 1,829 files, that climb is the only way to
+get the answer."
 
-**3. Who do I ask? Shallow vs deep (0:40–1:05).** Ask: *"Who approves
-pkg/apis/core/validation/validation.go? First check only its own folder."* "Its own
-folder's OWNERS file names reviewers only. Nobody can approve there." Then: *"Now follow the
-ownership tree."* "Two levels up, pkg/apis/OWNERS names six approvers. That's how Kubernetes'
-own tooling works, and for 1,829 files the answer only exists by walking the tree."
+**3. A real departure (0:40–1:00).** Type: *What did lavalamp leave behind, and who carries it now?*
+Say: "31 code areas and 39 design decisions, and none went dark. deads2k, liggitt and sttts
+already approve most of those areas."
 
-**4. A real departure (1:05–1:25).** Ask: *"What did lavalamp leave behind, and who carries
-it now?"* "31 code areas and 39 design decisions, and nothing went dark. deads2k, liggitt and
-sttts already approve 22, 20 and 18 of those areas."
+**4. What if, then act (1:00–1:35).** Type: *If thockin left tomorrow, what would go dark? Draft the hand-off.*
+Say: "Two areas would lose every approver, eight would be down to one person, and twelve
+design decisions would have nobody left who can explain them. The agent then writes a
+hand-off note and an OWNERS patch." Open `out/handoffs/` and show the patch for a second.
 
-**5. What if, then act (1:25–2:05).** Ask: *"If thockin left tomorrow, what would go dark?
-Draft the hand-off."* "137 areas. Two would lose their last local approver and eight would
-be down to one person. Twelve design decisions would have nobody left who wrote or approved
-them, IPVS load balancing among them." *Open the hand-off note and the patch.* "For each
-at-risk area it proposes a successor, someone who already reviews that code, and writes an
-OWNERS patch that applies cleanly. That's a PR the project could open today."
+**5. Live update (1:35–2:10).** Quit with Ctrl-D. Run `python -m inheritance.sync --steps 1`.
+Say: "On October 3 a real pull request moved a maintainer to emeritus. The graph rewrites
+only the folders it touched." Start the agent again and type: *Who covers what rexagod used
+to approve? Are any records out of date?*
+Say: "All 30 areas still have six approvers, and it flags that the team roster still lists
+rexagod as a lead."
 
-**6. Keeping current, live (2:05–2:45).** "The graph is from October 1. On October 3 this
-merged." Run `python -m inheritance.sync --steps 1`. "PR #142237, 'Move myself to emeritus'.
-The graph rewrites only the 35 folders that changed." Ask: *"Who covers what rexagod used to
-approve? Are any records out of date?"* "Every one of those 30 areas still has six
-approvers, with the PR cited. But sigs.yaml still lists rexagod as SIG Instrumentation lead,
-and the graph flags that." Then run `python -m inheritance.sync --verify`. "Replaying every
-change gives exactly the graph a fresh load would."
+**6. Honest gap (2:10–2:20).** Type: *Who owns the Postgres driver?*
+Say: "It isn't in the graph, so the agent says so instead of guessing."
 
-**7. Why, and who knows (2:45–3:10).** Ask: *"Why do sidecar containers restart during pod
-termination the way they do, and who should I ask?"* "It finds the design decision, quotes
-the motivation and the alternative the authors rejected, and routes the question to
-sergeykanzhelev, with matthyx as backup."
+**7. Without the graph (2:20–2:50).** Quit. Run
+`python -m inheritance.agent --no-graph "What did lavalamp leave behind, and who carries it now?"`
+Say: "Same AI, same question, no FalkorDB. It can't name the areas or the people. Across our
+test questions: 19 of 19 facts right with the graph, 0 of 19 without." Show `docs/with_without.md`.
 
-**8. Honest gaps (3:10–3:20).** Ask: *"Who owns the Postgres driver?"* "It says plainly that
-it's not in the graph. It doesn't make something up."
+**8. Close (2:50–3:00).** Say: "Every answer comes from the graph, with a receipt. Code, graph
+map and queries are in the repo."
 
-**9. Proof (3:20–3:45).** *Show the visuals' proof section.* "Every file's answer matches an
-independent walk of the raw files: 31,441 out of 31,441. Delete any one kind of
-relationship and answers change. Every answer comes with a receipt, and a grounding check
-flags any name the graph didn't return."
-
-**10. Close (3:45–4:00).** "Inheritance answers from people's public record, with
-attribution, never as them. Built on FalkorDB and Claude. The code, data model, queries and
-setup steps are in the repo."
+`./scripts/demo.sh` runs the same steps through the tools directly, without the AI.

@@ -1,0 +1,159 @@
+[
+  {
+    "q": 1,
+    "question": "If thockin left tomorrow, how many code areas would they leave behind, how many would have no local approver left, how many would be down to one approver, and how many design decisions would have nobody active left who wrote or approved them?",
+    "graph": true,
+    "answer": "If thockin (currently active) left tomorrow, the records show:\n\n- **137 code areas** list them as an approver.\n- **2 areas would have no local approver left.**\n- **8 areas would be down to one approver.**\n- **12 of the 107 design decisions (KEPs)** they wrote or approved would have nobody active left who wrote or approved them.\n- They also hold a **SIG Network lead seat**.\n\n**The 2 areas with no local approver.** Changes there wouldn't be blocked, because approval passes to the OWNERS file one folder up:\n- `pkg/proxy/apis/config` would pass to `pkg/proxy/OWNERS` (aojea, bowei, danwinship, robscott).\n- `vendor/sigs.k8s.io/randfill` would pass to `vendor/OWNERS` (bentheelder, cblecker, dims, liggitt, soltysh, sttts).\n\n**The 8 areas down to one approver:**\n- `pkg/apis/networking`: smarterclayton\n- `pkg/registry/core/service` and `pkg/registry/networking`: aojea\n- `pkg/volume/{configmap, downwardapi, emptydir, git_repo, secret}`: saad-ali\n\n**The 12 decisions are mostly SIG Network KEPs:**\n- KEP-265 IPVS load balancing\n- KEP-614 SCTP support\n- KEP-2079 Network Policy port ranges\n- KEP-2091 AdminNetworkPolicy\n- KEP-2447 making kube-proxy's service abstraction optional\n- KEP-2450 removing the pod cluster CIDR from iptables rules\n- KEP-2595 expanded DNS configuration\n- KEP-2943 Network Policy status (withdrawn)\n- KEP-3458 removing transient node predicates from the cloud controller's service controller\n- KEP-3726 standard application protocols\n- KEP-3836 kube-proxy ingress connectivity reliability\n- KEP-1734 Image Promoter (SIG Release)\n\nAll of this comes from the OWNERS files in kubernetes/kubernetes at commit e7967bb9b76 (2026-10-03), sigs.yaml and the kep.yaml files in kubernetes/enhancements.\n\n**What to do:** the volume and networking areas left with one approver are the riskiest. I can run `heirs` to see who already shares this knowledge, or `draft_handoff` to propose a successor for each of these areas and write an OWNERS patch.",
+    "facts_expected": [
+      "137",
+      "2",
+      "8",
+      "12"
+    ],
+    "facts_found": [
+      "137",
+      "2",
+      "8",
+      "12"
+    ],
+    "sources": 15,
+    "grounding": "33/33",
+    "flagged": [],
+    "tool_calls": 1,
+    "queries": 17,
+    "seconds": 13.1
+  },
+  {
+    "q": 1,
+    "question": "If thockin left tomorrow, how many code areas would they leave behind, how many would have no local approver left, how many would be down to one approver, and how many design decisions would have nobody active left who wrote or approved them?",
+    "graph": false,
+    "answer": "<find_person>\n<query>thockin</query>\n</find_person>\n",
+    "facts_expected": [
+      "137",
+      "2",
+      "8",
+      "12"
+    ],
+    "facts_found": [],
+    "sources": 0,
+    "grounding": "0/1",
+    "flagged": [
+      "thockin"
+    ],
+    "tool_calls": 0,
+    "queries": 0,
+    "seconds": 1.5
+  },
+  {
+    "q": 2,
+    "question": "rexagod recently stepped back in Kubernetes. Which pull request did it, how many code areas did it affect, and who approves those areas now?",
+    "graph": true,
+    "answer": "rexagod stepped back through **PR #142237, \"Move myself to emeritus\"**, merged 2026-10-03. It affected **30 code areas**, and **none of them is now short of approvers**. The areas with the fewest approvers left still have six each.\n\n**The PR** (https://github.com/kubernetes/kubernetes/pull/142237)\n- The PR made 35 OWNERS changes across 30 distinct code areas. Most remove rexagod as an approver. At least one removes them as a reviewer (`component-base/tracing/api`). Some folders lost both roles, so there are more changes than areas.\n- Areas affected include:\n  - `cluster/addons/` (fluentd-gcp, metadata-agent, metrics-server)\n  - `hack/tools/instrumentation`\n  - `pkg/features` and the apiserver / apiextensions-apiserver `pkg/features`\n  - apiserver `server/flagz` and `server/statusz`\n  - apiserver storage metrics (cacher, etcd3, storage)\n  - component-base `tracing` and `zpages`\n  - client-go `tools/record`\n\n**Who approves now**\n- The areas with the fewest approvers left are all the instrumentation-related ones: the three cluster addons, `hack/tools/instrumentation` and its testdata, and the three apiserver storage metrics folders. Each is now approved by **dashpole, dgrisonnet, pohly, rainbowmango, richabanker and serathius**.\n- No area lost its last approver, and none is down to one.\n- rexagod held no approver rights anywhere after this PR. I didn't pull the full approver list for every one of the 30 areas. Since the six-approver areas are the thinnest, every other area has at least six.\n\n**Still on record**\n- The records still list rexagod as **active** and as **chair of SIG Instrumentation**. That's because sigs.yaml hasn't changed, even though they now have no code ownership.\n- They're tied to 5 design proposals (KEPs). They wrote 5905, 4785 and 2305 and approved 5207 and 4827. Each of these still has other people listed on it who are active.\n\n**What to do:** Nothing is urgent for code review coverage. If they also mean to step back as SIG chair, sigs.yaml should change to match. `flag_stale_records` can check for that kind of mismatch, and if you want specific people to take over their KEPs, `draft_handoff` can propose owners.",
+    "facts_expected": [
+      "142237",
+      "30",
+      "dashpole",
+      "dgrisonnet",
+      "pohly",
+      "rainbowmango",
+      "richabanker",
+      "serathius"
+    ],
+    "facts_found": [
+      "142237",
+      "30",
+      "dashpole",
+      "dgrisonnet",
+      "pohly",
+      "rainbowmango",
+      "richabanker",
+      "serathius"
+    ],
+    "sources": 3,
+    "grounding": "10/10",
+    "flagged": [],
+    "tool_calls": 4,
+    "queries": 25,
+    "seconds": 15.5
+  },
+  {
+    "q": 2,
+    "question": "rexagod recently stepped back in Kubernetes. Which pull request did it, how many code areas did it affect, and who approves those areas now?",
+    "graph": false,
+    "answer": "**I can't answer this yet: I have no tool access in this session, so I have no graph results.** The PR number, the count of affected areas, and the current approvers must come from the graph. I won't guess them, and I won't treat missing results as evidence that nothing changed.\n\n**What I would run once the tools are available:**\n\n1. **`find_person(\"rexagod\")`** confirms the handle exists in the graph. If it returns not_in_graph, that is the answer: the records don't cover them. It would not mean they had no role.\n2. **`departure_impact(\"rexagod\")`**\n   - If the result includes `stepped_back_recently`, it names the synced pull request that moved them out of `approvers` (often into `emeritus_approvers`). That PR answers your first question.\n   - It also lists the OWNERS-governed code areas the change touched. That count answers your second question.\n3. **`who_approves(<area>)`** for each affected area shows who can approve now. Each result should come from the OWNERS file and the latest ownership change behind it. Any area that returns `no_approvers_within_reach` is a real gap and would be flagged.\n4. **`heirs(\"rexagod\")`** is optional. It shows who is best placed to pick up the knowledge they carried, beyond formal approval rights.\n\n**Next step:** Re-run this in a session where the Inheritance tools are connected. I'll come back with the PR (with link), the number of areas, and the current approvers for each, all attributed to the OWNERS files and PR records.",
+    "facts_expected": [
+      "142237",
+      "30",
+      "dashpole",
+      "dgrisonnet",
+      "pohly",
+      "rainbowmango",
+      "richabanker",
+      "serathius"
+    ],
+    "facts_found": [],
+    "sources": 1,
+    "grounding": "0/1",
+    "flagged": [
+      "rexagod"
+    ],
+    "tool_calls": 0,
+    "queries": 0,
+    "seconds": 8.2
+  },
+  {
+    "q": 3,
+    "question": "Who can approve a change to pkg/apis/core/validation/validation.go in kubernetes/kubernetes, and which OWNERS file says so?",
+    "graph": true,
+    "answer": "**Approvers:** deads2k, jpbetz, liggitt, msau42, smarterclayton and thockin. The approver list comes from **`pkg/apis/OWNERS`**, two folders above the file.\n\n**Evidence** (graph as of kubernetes/kubernetes@e7967bb9b76, 2026-10-03):\n- The nearest file is `pkg/apis/core/validation/OWNERS`, but it lists no approvers itself. The lookup moved up two levels (`validation/` \u2192 `core/` \u2192 `apis/`) before finding any.\n- `pkg/apis/OWNERS` lists:\n  - **Approvers:** deads2k, jpbetz, liggitt, msau42, smarterclayton, thockin\n  - **Reviewers:** andrewsykim, caesarxuchao, cici37, dchen1107, derekwaynecarr, dims, janetkuo, jsafrane, justinsb, luxas, mikedanese, mwielgus\n- No former (emeritus) approvers are listed at that level.\n- No ownership change for this path has been synced into the graph.\n\n**What to do:** Ask one of those six approvers for `/approve`, and pick one of the reviewers for `/lgtm`. Approvers in higher-level OWNERS files, such as the repo root, could also approve, but this lookup only shows the nearest level that has approvers.\n\n**Check first:** This file is the core API validation code, so changes often need API review as well. If you're unsure whether the people you pick are still active, I can run `whois` on them.",
+    "facts_expected": [
+      "pkg/apis/OWNERS",
+      "deads2k",
+      "jpbetz",
+      "liggitt",
+      "msau42",
+      "smarterclayton",
+      "thockin"
+    ],
+    "facts_found": [
+      "pkg/apis/OWNERS",
+      "deads2k",
+      "jpbetz",
+      "liggitt",
+      "msau42",
+      "smarterclayton",
+      "thockin"
+    ],
+    "sources": 3,
+    "grounding": "20/20",
+    "flagged": [],
+    "tool_calls": 1,
+    "queries": 11,
+    "seconds": 9.1
+  },
+  {
+    "q": 3,
+    "question": "Who can approve a change to pkg/apis/core/validation/validation.go in kubernetes/kubernetes, and which OWNERS file says so?",
+    "graph": false,
+    "answer": "**I can't answer this yet.** I haven't been able to query the graph in this session, and naming approvers or an OWNERS file without a tool result would be a guess.\n\n**What I'd run:**\n- `who_approves` on `pkg/apis/core/validation/validation.go` in kubernetes/kubernetes. This returns:\n  - the nearest OWNERS file that governs that path (it may sit in `validation/`, or climb to `pkg/apis/core/` or higher),\n  - its approvers, with emeritus approvers marked separately,\n  - the latest synced ownership change (PR) behind that file, if any.\n- `max_climb=0` for the shallow view, showing only an OWNERS file in that exact directory.\n\n**What to do:**\n- If you can re-run this with graph access, I'll report the outcome as returned.\n  - If it's *answered*, you'll get the approvers and the OWNERS file path, with the PR source.\n  - If the outcome is `not_in_graph`, `not_in_repo`, or `no_approvers_within_reach`, I'll tell you that plainly rather than filling the gap.\n- Until then, the source of truth is the `OWNERS` file in that directory or the nearest parent in kubernetes/kubernetes.",
+    "facts_expected": [
+      "pkg/apis/OWNERS",
+      "deads2k",
+      "jpbetz",
+      "liggitt",
+      "msau42",
+      "smarterclayton",
+      "thockin"
+    ],
+    "facts_found": [],
+    "sources": 1,
+    "grounding": "0/2",
+    "flagged": [
+      "pkg/apis/core",
+      "pkg/apis/core/validation/validation.go"
+    ],
+    "tool_calls": 0,
+    "queries": 0,
+    "seconds": 6.9
+  }
+]
