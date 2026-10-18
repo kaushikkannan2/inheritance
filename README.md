@@ -21,6 +21,43 @@ land every week as merged pull requests, and Inheritance replays them into the g
 
 Built for **Graph Hacks** (FalkorDB × WeMakeDevs). **Track entered: Track 03, Company Brain.**
 
+## Graph map
+
+```mermaid
+flowchart LR
+  P((Person)) -- APPROVES / REVIEWS / EMERITUS_OF --> D[Dir<br/>code folder]
+  D -- CHILD_OF --> D
+  P -- WORKED_WITH --> P
+  P -- LEADS / LED --> T[Team]
+  S[Subproject] -- PART_OF --> T
+  S -- OWNS --> D
+  P -- AUTHORED / REVIEWED / APPROVED --> K[KEP<br/>design decision]
+  K -- OWNED_BY / INVOLVES --> T
+  Doc[Document<br/>why it was built] -- DESCRIBES --> K
+  C[Change<br/>merged PR] -- TOUCHED --> D
+  C -- AFFECTED --> P
+  H[Handoff / Question / Flag] -- FOR / ROUTED_TO / ABOUT --> P
+```
+
+**How the agent queries it.** Claude never writes Cypher. It picks one of 17 fixed tools, and
+each tool is a graph query (full list and Cypher below):
+
+| Question | Tool | What runs in FalkorDB |
+|---|---|---|
+| Who can approve this file? | `who_approves` | climb `CHILD_OF*` until a `Dir` with `APPROVES` edges |
+| What leaves with this person? | `departure_impact` | their `APPROVES` dirs, count remaining approvers; their `AUTHORED/APPROVED` KEPs with nobody active left |
+| Who carries it now? | `heirs` | rank active `WORKED_WITH` neighbours by edge weight, with the dirs they already approve |
+| Who knows about X? | `who_knows`, `why` | full-text search on `Document`/`KEP`, then the people linked to them |
+| Who is the real team? Who holds it together? | `shadow_teams`, `keystone_people` | `algo.labelPropagation`, `algo.betweenness` |
+| What changed? | `recent_changes` | `Change`-`TOUCHED`->`Dir`, `Change`-`AFFECTED`->`Person` |
+| Draft the hand-off | `draft_handoff` | the queries above, then writes `Handoff` nodes and an OWNERS patch |
+
+**Where the decisions come from.** Every name and number in an answer comes from a tool
+result, and the terminal prints each tool call as it runs. After each answer the agent prints a
+receipt (tools called, queries, rows) and a grounding check that flags any name the graph did
+not return. Run the same questions with `--no-graph` and the agent gets 0 of 19 facts right,
+against 19 of 19 with the graph. See [Proving the graph does the work](#proving-the-graph-does-the-work).
+
 ## Why a graph
 
 Knowledge in an organization lives in the connections between people, code and decisions:
