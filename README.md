@@ -24,8 +24,8 @@ Built for **Graph Hacks** (FalkorDB × WeMakeDevs). **Track entered: Track 03, C
 ## Graph map
 
 ```mermaid
-%%{init: {"theme":"base","themeVariables":{"fontSize":"15px","lineColor":"#8C93A8","edgeLabelBackground":"#FFFFFF"}}}%%
-flowchart LR
+%%{init: {"theme":"base","themeVariables":{"fontSize":"15px","lineColor":"#8C93A8","edgeLabelBackground":"#FFFFFF"},"flowchart":{"diagramPadding":24,"nodeSpacing":40,"rankSpacing":55}}}%%
+flowchart TB
   P(("👤 Person")):::person
   D["📁 Dir<br/>code folder"]:::code
   T["👥 Team"]:::team
